@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const bank = ['questions.txt', 'growth.txt', 'trade.txt'].flatMap(file =>
@@ -26,7 +26,7 @@ for (const [route, file, type] of [
 
 mkdirSync('dist/server', { recursive: true });
 mkdirSync('dist/.openai', { recursive: true });
-copyFileSync('.openai/hosting.json', 'dist/.openai/hosting.json');
+if (existsSync('.openai/hosting.json')) copyFileSync('.openai/hosting.json', 'dist/.openai/hosting.json');
 writeFileSync('dist/server/index.js',
   'const BANK = ' + JSON.stringify(bank) + ';\nconst ASSETS = ' + JSON.stringify(assets) + ';\n' +
   readFileSync('worker.mjs', 'utf8'));
