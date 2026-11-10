@@ -4,7 +4,7 @@
 
 ## 실행 및 배포
 
-- Node.js 22.13 이상에서 `npm test`를 실행하면 문항 구조, 채점, 시간 제한 및 상위 50위 공용 순위를 검사합니다.
+- Node.js 22.13 이상에서 `npm test`를 실행하면 문항 구조, 채점, 시간 제한 및 상위 100위 공용 순위를 검사합니다.
 - `npm run build`는 Cloudflare Worker 형식의 `dist/server/index.js`를 생성합니다. 배포 환경에서 D1 데이터베이스를 `DB`로 연결하고 `drizzle/`의 SQL 변경 파일을 번호 순서대로 적용합니다.
 - `questions.txt`, `growth.txt`, `trade.txt`에 문제와 해설이 있습니다. 각 줄은 주제, 질문, 정답, 오답 3개, 해설 순입니다. 게임에서는 보기 순서를 무작위로 바꿉니다.
 
