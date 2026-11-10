@@ -221,22 +221,45 @@ function showRankingCat(cell, coat, points) {
   showCatGrowth(portrait, points);
   cell.append(portrait, name);
 }
+let rankingRows = [];
+let rankingPage = 1;
+const RANKING_PAGE_SIZE = 50;
+const rankingPageButtons = [$('rank-page-1'), $('rank-page-2')];
+function renderRanking() {
+  if (rankingRows.length <= RANKING_PAGE_SIZE) rankingPage = 1;
+  const offset = (rankingPage - 1) * RANKING_PAGE_SIZE;
+  const rows = rankingRows.slice(offset, offset + RANKING_PAGE_SIZE);
+  $('board').tBodies[0].replaceChildren(...rows.map(row => {
+    const tr = document.createElement('tr');
+    tr.insertCell().textContent = row.rank + '위';
+    tr.insertCell().textContent = row.nickname;
+    showRankingCat(tr.insertCell(), row.coat, row.score);
+    tr.insertCell().textContent = row.score + '점';
+    tr.insertCell().textContent = row.weight + ' kg';
+    return tr;
+  }));
+  for (const [i, button] of rankingPageButtons.entries()) {
+    if (rankingPage === i + 1) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  }
+  rankingPageButtons[1].disabled = rankingRows.length <= RANKING_PAGE_SIZE;
+  $('board').hidden = !rows.length;
+  $('rank-status').textContent = rows.length
+    ? rows[0].rank + '~' + rows[rows.length - 1].rank + '위 · 전체 ' + rankingRows.length + '명'
+    : '아직 순위 기록이 없어요. 첫 기록에 도전해 보세요!';
+}
+for (const [i, button] of rankingPageButtons.entries()) {
+  button.addEventListener('click', () => {
+    rankingPage = i + 1;
+    renderRanking();
+  });
+}
 async function loadRanking() {
   $('refresh').disabled = true;
   $('rank-status').textContent = '기록을 불러오는 중이에요.';
   try {
-    const rows = await api('ranking');
-    $('board').tBodies[0].replaceChildren(...rows.map(row => {
-      const tr = document.createElement('tr');
-      tr.insertCell().textContent = row.rank + '위';
-      tr.insertCell().textContent = row.nickname;
-      showRankingCat(tr.insertCell(), row.coat, row.score);
-      tr.insertCell().textContent = row.score + '점';
-      tr.insertCell().textContent = row.weight + ' kg';
-      return tr;
-    }));
-    $('board').hidden = !rows.length;
-    $('rank-status').textContent = rows.length ? '' : '아직 순위 기록이 없어요. 첫 기록에 도전해 보세요!';
+    rankingRows = await api('ranking');
+    renderRanking();
   } catch {
     $('rank-status').textContent = '순위를 불러오지 못했어요. 새로고침 버튼을 눌러 주세요.';
   } finally {
