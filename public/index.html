@@ -19,16 +19,8 @@
 <p class="intro">2분 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요!</p>
 <ul class="topics"><li>시장경제와 가계·기업</li><li>경제성장과 우리 생활</li><li>세계 속의 무역</li></ul>
 <form id="start">
-<fieldset class="nickname-picker" aria-describedby="privacy">
-<legend>나의 별명</legend>
-<div class="nickname-words">
-<label for="nickname-first">꾸밈말
-<select id="nickname-first"><!-- NICKNAME_FIRST --></select></label>
-<label for="nickname-second">동물
-<select id="nickname-second"><!-- NICKNAME_SECOND --></select></label>
-</div>
-<div class="nickname-preview"><output id="nickname-preview" for="nickname-first nickname-second"></output><button id="random-nickname" type="button">🎲 무작위로 뽑기</button></div>
-</fieldset>
+<label for="nickname">나의 별명</label>
+<input id="nickname" required minlength="2" maxlength="12" autocomplete="off" placeholder="예: 간식대장" aria-describedby="privacy">
 <small id="privacy">별명과 점수는 공개 순위에 올라가요.</small>
 <button class="primary" type="submit">퀴즈 시작하기 <span aria-hidden="true">→</span></button>
 </form>
