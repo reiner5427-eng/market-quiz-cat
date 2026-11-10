@@ -30,8 +30,10 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.exec(readFileSync('drizzle/0001_reset_ranking.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0002_ranking_coat.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0003_expand_cat_coats.sql', 'utf8'));
+    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)')
+      .run('previous', '이전시즌', '[]', 1, 200);
     assert.deepEqual(await data('/api/ranking'), []);
-    db.prepare('DELETE FROM games WHERE id = ?').run('old');
+    db.prepare("DELETE FROM games WHERE id IN ('old', 'previous')").run();
     assert.equal((await client('/')).status, 200);
     assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
     for (const nickname of ['씨발고양이', '시1발', 'ㅅ_ㅂ', '일 베', '일1베', '앙기모띠', '기 모 띠',
@@ -49,6 +51,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     assert.equal((await client('/api/start', { nickname: '간식대장', coat: 'invalid' })).status, 400);
     const started = await data('/api/start', { nickname: '간식대장', coat: 'tuxedo' });
     assert.equal(started.question.choices.length, 4);
+    assert.equal(started.lives, 5);
     assert.ok(started.remainingMs > 119_000 && started.remainingMs <= 120_000);
     assert.equal(started.question.correctIndex, undefined);
     const deck = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(started.id).deck);
@@ -58,24 +61,45 @@ test('grades once, expires, and shares the top 30 across database connections', 
     assert.equal(first.score, 10);
     assert.equal(first.weight, '3.25');
     assert.equal(first.correct, true);
+    assert.equal(first.lives, 5);
     assert.ok(first.explanation);
     assert.deepEqual(await data('/api/answer', answer), first);
     const wrong = await data('/api/answer', { ...answer, step: 1, choice: (deck[1][1].indexOf(0) + 1) % 4 });
     assert.equal(wrong.correct, false);
     assert.equal(wrong.score, 10);
-    db.prepare('UPDATE games SET step = 99 WHERE id = ?').run(started.id);
+    assert.equal(wrong.lives, 4);
+    db.prepare('UPDATE games SET step = 99, score = 980 WHERE id = ?').run(started.id);
     const boundary = await data('/api/answer', { ...answer, step: 99, choice: (deck[99][1].indexOf(0) + 1) % 4 });
     assert.ok(boundary.question);
     const extended = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(started.id).deck);
     assert.equal(extended.length, 200);
     assert.equal(new Set(extended.slice(100).map(q => q[0])).size, 100);
     assert.notEqual(extended[99][0], extended[100][0]);
-    db.prepare('UPDATE games SET started = 0 WHERE id = ?').run(started.id);
+    db.prepare('UPDATE games SET started = 0, step = 2, score = 10 WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
-    assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25' });
+    assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25', lives: 4 });
     assert.equal((await data('/api/ranking'))[0].coat, 'tuxedo');
+    const second = await data('/api/start', { nickname: '하트점검' });
+    const secondDeck = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(second.id).deck);
+    const secondAnswer = (step, correct) => ({
+      id: second.id, step, choice: (secondDeck[step][1].indexOf(0) + (correct ? 0 : 1)) % 4
+    });
+    assert.equal((await data('/api/answer', secondAnswer(0, true))).lives, 5);
+    for (let step = 1; step <= 5; step++) {
+      const submitted = secondAnswer(step, false);
+      const graded = await data('/api/answer', submitted);
+      assert.equal(graded.lives, 5 - step);
+      assert.equal(graded.finished, step === 5);
+      assert.equal(graded.score, 10);
+      assert.equal(Boolean(graded.question), step < 5);
+      assert.ok(graded.explanation);
+      assert.deepEqual(await data('/api/answer', submitted), graded);
+    }
+    assert.deepEqual(await data('/api/answer', secondAnswer(6, true)),
+      { finished: true, score: 10, weight: '3.25', lives: 0 });
+    assert.ok((await data('/api/ranking')).some(row => row.nickname === '하트점검' && row.score === 10));
     const insert = db.prepare(
-      'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)'
+      'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)'
     );
     for (let i = 1; i <= 35; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
     insert.run('best', '고양이3', '[]', 40, 30);

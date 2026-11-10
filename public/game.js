@@ -51,6 +51,18 @@ function showQuestion(question) {
   $('feedback').hidden = true;
   $('prompt').focus();
 }
+function showLives(remaining) {
+  const meter = $('lives');
+  const full = document.createElement('span');
+  const empty = document.createElement('span');
+  full.className = 'full-hearts';
+  full.textContent = '♥'.repeat(remaining);
+  empty.className = 'empty-hearts';
+  empty.textContent = '♡'.repeat(game.lives - remaining);
+  full.setAttribute('aria-hidden', 'true');
+  empty.setAttribute('aria-hidden', 'true');
+  meter.replaceChildren(full, empty, ' 하트 ' + remaining + '/' + game.lives);
+}
 function tick() {
   const left = Math.max(0, Math.ceil((deadline - performance.now()) / 1000));
   $('clock').textContent = '⏱ ' + left + '초';
@@ -86,6 +98,7 @@ $('start').addEventListener('submit', async event => {
     $('welcome').hidden = true;
     $('playing').hidden = false;
     updateScore(0, '3.00');
+    showLives(game.lives);
     $('cat-says').textContent = '“야옹! 간식 줄 거냥?”';
     showQuestion(game.question);
     timer = setInterval(tick, 200);
@@ -105,11 +118,13 @@ async function answer(choice) {
   buttons.forEach(button => { button.disabled = true; });
   try {
     const data = await api('answer', { id: game.id, step, choice });
-    if (data.finished) return showResult(data);
-    updateScore(data.score, data.weight);
+    if (data.finished && !data.explanation) return showResult(data);
+    showLives(data.lives);
     const correctText = current.choices[data.correctIndex];
     const explanation = '정답: ' + correctText + ' · ' + data.explanation;
     review.push({ prompt: current.prompt, explanation, correct: data.correct });
+    if (data.finished) return showResult(data, explanation);
+    updateScore(data.score, data.weight);
     buttons[data.correctIndex].classList.add('good');
     if (!data.correct) buttons[choice].classList.add('wrong');
     const feedback = $('feedback');
@@ -157,12 +172,16 @@ async function finish() {
     busy = false;
   }
 }
-function showResult(data) {
+function showResult(data, lastExplanation = '') {
   clearInterval(timer);
   showMessage();
   updateScore(data.score, data.weight);
   $('playing').hidden = true;
   $('result').hidden = false;
+  $('result-title').textContent = data.lives === 0 ? '하트를 모두 잃었어요!' : '퀴즈 끝!';
+  const lastAnswer = $('last-answer');
+  lastAnswer.hidden = !lastExplanation;
+  if (lastExplanation) showCountryLabels(lastAnswer, lastExplanation);
   $('summary').textContent = '간식 ' + score / 10 + '개 · ' + score + '점 · ' + data.weight + ' kg';
   $('cat-says').textContent = '“함께 놀아서 즐거웠다냥!”';
   $('review').replaceChildren(...review.map(item => {

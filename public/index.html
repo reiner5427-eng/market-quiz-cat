@@ -16,7 +16,7 @@
 <div id="welcome">
 <p class="eyebrow">간식 가게에 오신 걸 환영해요!</p>
 <h1>뚱냥이의<br><span>시장경제 퀴즈</span></h1>
-<p class="intro">2분 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요!</p>
+<p class="intro">2분 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요! 오답으로 하트 5개를 모두 잃으면 게임이 끝나요.</p>
 <ul class="topics"><li>시장경제와 가계·기업</li><li>경제성장과 우리 생활</li><li>세계 속의 무역</li></ul>
 <form id="start">
 <fieldset id="cat-picker" class="cat-picker">
@@ -37,6 +37,7 @@
 </div>
 <div id="playing" hidden>
 <div class="progress"><span id="counter"></span><span id="clock" role="timer"></span></div>
+<p id="lives" class="lives" role="status"></p>
 <progress id="timebar" max="120" value="120" aria-label="남은 시간"></progress>
 <p id="topic" class="eyebrow"></p>
 <h2 id="prompt" tabindex="-1"></h2>
@@ -48,6 +49,7 @@
 <p class="eyebrow">오늘의 간식 기록</p>
 <h2 id="result-title" tabindex="-1">퀴즈 끝!</h2>
 <p id="summary"></p>
+<p id="last-answer" class="wrong" hidden></p>
 <div id="review"></div>
 <button id="again" class="primary">다시 도전하기 ↻</button>
 </div>

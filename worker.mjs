@@ -1,4 +1,7 @@
 const ROUND_MS = 120_000;
+const MAX_LIVES = 5;
+const ANSWER_POINTS = 10;
+const RANKING_GENERATION = 2;
 const COATS = new Set(['cheese', 'mackerel', 'white', 'gray', 'tuxedo']);
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {
@@ -17,6 +20,7 @@ const question = ([id, order]) => ({
   choices: order.map(i => BANK[id].choices[i])
 });
 const weight = score => (3 + score * .025).toFixed(2);
+const livesLeft = (step, score) => Math.max(0, MAX_LIVES - step + score / ANSWER_POINTS);
 
 const blockedKorean = /씨발|시발|쉬발|쒸발|씹발|씨팔|시팔|쉬팔|씨바|씨빠|씨벙|시벌|씨벌|쌍놈|쌍년|미친놈|미친년|미친새끼|개새끼|개시키|개색끼|개세끼|새끼야|병신|븅신|빙신|뱅신|븅쉰|등신|또라이|좆|좃|좇|죶|존나|졸라|조낸|존내|지랄|쥐랄|엿먹|꺼져|개같|개년|썅|씨댕|섹스|섹쓰|섹수|쎅스|쌕스|섹1스|야동|야설|음란|포르노|포르나|보짓|보지년|자지년|자위|정액|사정남|딸딸이|성기노출|따먹|기모띠|기모띄|기모티|기모찌|기무띠|키모띠|키모치|앙기모|일베|일간베스트|일베충|일베저장소|운지|노무노무|노무쿤|느그홍어|홍어새끼|홍어충|틀딱|김치녀|맘충|한남충|한녀충/;
 const blockedInitials = /ᄉᄇ|ᄊᄇ|ᄉᄑ|ᄇᄉ|ᄌᄅ|ᄌᄂ|ᄀᄉᄁ|ᄉᄉᄉ|ᄋᄇᄎ/;
@@ -46,12 +50,12 @@ async function api(request, db, route) {
         SELECT nickname, score, COALESCE(cat_coat, coat) AS coat, started, id,
           ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
         FROM games
-        WHERE ranking_eligible = 1 AND finished = 1 AND score > 0
+        WHERE ranking_eligible = ? AND finished = 1 AND score > 0
       )
       SELECT nickname, score, coat FROM best
       WHERE attempt = 1
       ORDER BY score DESC, started, id LIMIT 30`
-    ).all();
+    ).bind(RANKING_GENERATION).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
   if (request.method !== 'POST') return json({ error: '지원하지 않는 요청이에요.' }, 405);
@@ -82,9 +86,9 @@ async function api(request, db, route) {
     const deck = newDeck();
     const id = crypto.randomUUID();
     const started = Date.now();
-    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible, cat_coat) VALUES (?, ?, ?, ?, 1, ?)')
-      .bind(id, nickname, JSON.stringify(deck), started, coat).run();
-    return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
+    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible, cat_coat) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(id, nickname, JSON.stringify(deck), started, RANKING_GENERATION, coat).run();
+    return json({ id, lives: MAX_LIVES, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
   }
 
   if (!['/api/answer', '/api/finish'].includes(route)) return json({ error: '페이지가 없어요.' }, 404);
@@ -92,41 +96,46 @@ async function api(request, db, route) {
   const game = await db.prepare('SELECT * FROM games WHERE id = ?').bind(body.id).first();
   if (!game) return json({ error: '게임을 찾지 못했어요.' }, 404);
   const now = Date.now();
-  const final = score => json({ finished: true, score, weight: weight(score) });
-  if (route === '/api/finish') {
-    const row = await db.prepare('UPDATE games SET finished = 1 WHERE id = ? RETURNING score')
+  const final = ({ score, step }) => json({ finished: true, score, weight: weight(score), lives: livesLeft(step, score) });
+  async function finishGame() {
+    const row = await db.prepare('UPDATE games SET finished = 1 WHERE id = ? RETURNING score, step')
       .bind(game.id).first();
-    return final(row.score);
+    return final(row);
   }
+  if (route === '/api/finish') return finishGame();
   const { step, choice } = body;
   if (!Number.isInteger(step) || step < 0 || !Number.isInteger(choice) || choice < 0 || choice > 3) {
     return json({ error: '보기를 골라 주세요.' }, 400);
   }
 
   const deck = JSON.parse(game.deck);
-  if (!deck[step]) return game.finished ? final(game.score) : json({ error: '문제 번호를 확인해 주세요.' }, 409);
+  if (!deck[step]) return game.finished ? final(game) : json({ error: '문제 번호를 확인해 주세요.' }, 409);
   const [index, order] = deck[step];
   const correctIndex = order.indexOf(0);
   const correct = choice === correctIndex;
-  const feedback = score => json({
-    correct, correctIndex, explanation: BANK[index].explanation, score, weight: weight(score),
-    question: question(deck[step + 1])
-  });
-  if (!game.finished && game.step === step + 1 && game.last_answer === choice) return feedback(game.score);
-  if (game.finished) return final(game.score);
-  if (now >= game.started + ROUND_MS) {
-    const row = await db.prepare('UPDATE games SET finished = 1 WHERE id = ? RETURNING score').bind(game.id).first();
-    return final(row.score);
+  const feedback = score => {
+    const lives = livesLeft(step + 1, score);
+    return json({
+      correct, correctIndex, explanation: BANK[index].explanation, score, weight: weight(score), lives,
+      finished: lives === 0, question: lives ? question(deck[step + 1]) : null
+    });
+  };
+  const remainingLives = livesLeft(game.step, game.score);
+  if ((!game.finished || remainingLives === 0) && game.step === step + 1 && game.last_answer === choice) {
+    return feedback(game.score);
   }
+  if (game.finished) return final(game);
+  if (!remainingLives || now >= game.started + ROUND_MS) return finishGame();
   if (game.step !== step) return json({ error: '이미 채점된 문제예요.' }, 409);
-  const extra = step === deck.length - 1 ? newDeck() : null;
+  const exhausted = !correct && remainingLives === 1;
+  const extra = !exhausted && step === deck.length - 1 ? newDeck() : null;
   if (extra) {
     if (extra[0][0] === index) [extra[0], extra[1]] = [extra[1], extra[0]];
     deck.push(...extra);
   }
   const row = await db.prepare(
-    'UPDATE games SET step = step + 1, score = score + ?, last_answer = ?, deck = COALESCE(?, deck) WHERE id = ? AND step = ? AND finished = 0 RETURNING score'
-  ).bind(correct ? 10 : 0, choice, extra ? JSON.stringify(deck) : null, game.id, step).first();
+    'UPDATE games SET step = step + 1, score = score + ?, last_answer = ?, deck = COALESCE(?, deck), finished = ? WHERE id = ? AND step = ? AND finished = 0 RETURNING score'
+  ).bind(correct ? ANSWER_POINTS : 0, choice, extra ? JSON.stringify(deck) : null, Number(exhausted), game.id, step).first();
   if (!row) return json({ error: '이미 채점된 문제예요. 같은 보기를 다시 누르면 결과를 불러올 수 있어요.' }, 409);
   return feedback(row.score);
 }

@@ -73,3 +73,9 @@ svg[data-coat="tuxedo"] .tuxedo-blaze{display:inline}
 #welcome :is(.eyebrow,.topics li,legend,label,button){font-weight:400}
 #welcome .primary{font-size:1.12rem}
 #welcome #nickname{font-family:system-ui,"Malgun Gothic",sans-serif}
+
+.lives{margin:0 0 6px;font-weight:800;font-size:.9rem}
+.full-hearts,.empty-hearts{font-size:1.25rem;letter-spacing:.08em}
+.full-hearts{color:#ab2c44}
+.empty-hearts{color:#715851}
+#last-answer{padding:12px;border:1px solid #dba392;border-radius:12px;background:#ffede7}
