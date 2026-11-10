@@ -53,13 +53,27 @@ function tick() {
   $('timebar').value = left;
   if (!left && !busy) finish();
 }
+const nicknameFields = [$('nickname-first'), $('nickname-second')];
+const selectedNickname = () => nicknameFields.map(field => field.value).join(' ');
+function showNickname() {
+  $('nickname-preview').value = selectedNickname();
+}
+for (const field of nicknameFields) field.addEventListener('change', showNickname);
+function randomNickname() {
+  for (const field of nicknameFields) {
+    field.selectedIndex = (field.selectedIndex + 1 + Math.floor(Math.random() * (field.length - 1))) % field.length;
+  }
+  showNickname();
+}
+$('random-nickname').addEventListener('click', randomNickname);
+randomNickname();
 $('start').addEventListener('submit', async event => {
   event.preventDefault();
   const button = event.submitter;
   button.disabled = true;
   showMessage();
   try {
-    game = await api('start', { nickname: $('nickname').value });
+    game = await api('start', { nickname: selectedNickname() });
     deadline = performance.now() + game.remainingMs;
     step = 0;
     busy = ending = false;
@@ -162,7 +176,7 @@ $('again').addEventListener('click', () => {
   $('welcome').hidden = false;
   updateScore(0, '3.00');
   $('cat-says').textContent = '“야옹! 간식 줄 거냥?”';
-  $('nickname').focus();
+  nicknameFields[0].focus();
 });
 async function loadRanking() {
   $('refresh').disabled = true;

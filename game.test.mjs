@@ -26,8 +26,14 @@ test('grades once, expires, and shares the top 30 across database connections', 
   try {
     db.exec(readFileSync('drizzle/0000_game.sql', 'utf8'));
     assert.equal((await client('/')).status, 200);
-    assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
-    const started = await data('/api/start', { nickname: '간식대장' });
+    for (const nickname of ['01234567890', '시발', '일베', '야동', '반짝이는고양이', '반짝이는  고양이',
+      '반짝이는 고양이!', '반짝이는 고양이\u200b', ['반짝이는 고양이'], null]) {
+      assert.equal((await client('/api/start', { nickname })).status, 400);
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM games').get().count, 0);
+    const nickname = '반짝이는 고양이';
+    const started = await data('/api/start', { nickname });
+    assert.equal(db.prepare('SELECT nickname FROM games WHERE id = ?').get(started.id).nickname, nickname);
     assert.equal(started.question.choices.length, 4);
     assert.ok(started.remainingMs > 119_000 && started.remainingMs <= 120_000);
     assert.equal(started.question.correctIndex, undefined);

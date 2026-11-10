@@ -37,9 +37,9 @@ async function api(request, db, route) {
     return json({ error: '요청을 읽을 수 없어요.' }, 400);
   }
   if (route === '/api/start') {
-    const nickname = typeof body.nickname === 'string' ? body.nickname.normalize('NFKC').trim() : '';
-    if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
-      return json({ error: '실명 대신 한글 또는 영문이 포함된 2~12자 별명을 써 주세요.' }, 400);
+    const { nickname } = body;
+    if (!APPROVED_NICKNAMES.has(nickname)) {
+      return json({ error: '화면에서 꾸밈말과 동물을 골라 별명을 만들어 주세요.' }, 400);
     }
     const deck = newDeck();
     const id = crypto.randomUUID();
