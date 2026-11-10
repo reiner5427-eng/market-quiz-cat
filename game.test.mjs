@@ -25,6 +25,11 @@ test('grades once, expires, and shares the top 30 across database connections', 
 
   try {
     db.exec(readFileSync('drizzle/0000_game.sql', 'utf8'));
+    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished) VALUES (?, ?, ?, ?, ?, 1)')
+      .run('old', '이전기록', '[]', 0, 90);
+    db.exec(readFileSync('drizzle/0001_reset_ranking.sql', 'utf8'));
+    assert.deepEqual(await data('/api/ranking'), []);
+    db.prepare('DELETE FROM games WHERE id = ?').run('old');
     assert.equal((await client('/')).status, 200);
     assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
     for (const nickname of ['씨발고양이', '시1발', 'ㅅ_ㅂ', '일 베', '일1베', '앙기모띠', '기 모 띠',
@@ -65,16 +70,26 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.prepare('UPDATE games SET started = 0 WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
     assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25' });
-    for (let i = 1; i <= 35; i++) {
-      db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished) VALUES (?, ?, ?, ?, ?, 1)')
-        .run('test' + i, '고양이' + i, '[]', i, 20);
-    }
+    const insert = db.prepare(
+      'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)'
+    );
+    for (let i = 1; i <= 35; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
+    insert.run('best', '고양이3', '[]', 40, 30);
+    insert.run('lower', '고양이3', '[]', 41, 10);
+    insert.run('tie', '고양이3', '[]', 42, 30);
+    insert.run('tieOther', '고양이5', '[]', 41, 30);
+    insert.run('caseBest', 'CloudCat', '[]', 43, 40);
+    insert.run('caseLower', 'cloudcat', '[]', 44, 30);
     db.close();
     db = new DatabaseSync(file);
     const board = await data('/api/ranking');
     assert.equal(board.length, 30);
-    assert.equal(board[0].nickname, '고양이1');
-    assert.equal(board[29].nickname, '고양이30');
+    assert.deepEqual(board.slice(0, 4).map(row => [row.nickname, row.score]), [
+      ['CloudCat', 40], ['고양이3', 30], ['고양이5', 30], ['고양이1', 20]
+    ]);
+    assert.equal(board.filter(row => row.nickname.toLowerCase() === 'cloudcat').length, 1);
+    assert.equal(board.filter(row => row.nickname === '고양이3').length, 1);
+    assert.equal(board[29].nickname, '고양이29');
     assert.equal(board[29].rank, 30);
   } finally {
     db.close();

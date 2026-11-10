@@ -1,0 +1,1 @@
+ALTER TABLE games ADD COLUMN ranking_eligible INTEGER NOT NULL DEFAULT 0;

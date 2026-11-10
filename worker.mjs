@@ -41,7 +41,15 @@ function isBlockedNickname(nickname) {
 async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
     const { results } = await db.prepare(
-      'SELECT nickname, score FROM games WHERE finished = 1 AND score > 0 ORDER BY score DESC, started, id LIMIT 30'
+      `WITH best AS (
+        SELECT nickname, score, started, id,
+          ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
+        FROM games
+        WHERE ranking_eligible = 1 AND finished = 1 AND score > 0
+      )
+      SELECT nickname, score FROM best
+      WHERE attempt = 1
+      ORDER BY score DESC, started, id LIMIT 30`
     ).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
@@ -69,7 +77,7 @@ async function api(request, db, route) {
     const deck = newDeck();
     const id = crypto.randomUUID();
     const started = Date.now();
-    await db.prepare('INSERT INTO games (id, nickname, deck, started) VALUES (?, ?, ?, ?)')
+    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible) VALUES (?, ?, ?, ?, 1)')
       .bind(id, nickname, JSON.stringify(deck), started).run();
     return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
   }
