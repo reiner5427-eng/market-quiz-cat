@@ -55,7 +55,7 @@ async function api(request, db, route) {
       )
       SELECT nickname, score, coat FROM best
       WHERE attempt = 1
-      ORDER BY score DESC, started, id LIMIT 30`
+      ORDER BY score DESC, started, id LIMIT 50`
     ).bind(RANKING_GENERATION).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
