@@ -48,7 +48,7 @@ async function api(request, db, route) {
     const started = Date.now();
     await db.prepare('INSERT INTO games (id, nickname, deck, started) VALUES (?, ?, ?, ?)')
       .bind(id, nickname, JSON.stringify(deck), started).run();
-    return json({ id, expires: started + ROUND_MS, question: question(deck[0]), limit: LIMIT });
+    return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]), limit: LIMIT });
   }
 
   if (!['/api/answer', '/api/finish'].includes(route)) return json({ error: '페이지가 없어요.' }, 404);

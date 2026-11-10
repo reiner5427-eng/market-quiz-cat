@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 const topics = { A: '시장경제와 가계·기업', B: '경제성장과 우리 생활', C: '세계 속의 무역' };
-let game, timer, step, current, upcoming, busy, ending, score, review;
+let game, deadline, timer, step, current, upcoming, busy, ending, score, review;
 
 async function api(route, body) {
   const response = await fetch('/api/' + route, body ? {
@@ -37,7 +37,7 @@ function showQuestion(question) {
   $('prompt').focus();
 }
 function tick() {
-  const left = Math.max(0, Math.ceil((game.expires - Date.now()) / 1000));
+  const left = Math.max(0, Math.ceil((deadline - performance.now()) / 1000));
   $('clock').textContent = '⏱ ' + left + '초';
   $('timebar').value = left;
   if (!left && !busy) finish();
@@ -49,6 +49,7 @@ $('start').addEventListener('submit', async event => {
   showMessage();
   try {
     game = await api('start', { nickname: $('nickname').value });
+    deadline = performance.now() + game.remainingMs;
     step = 0;
     busy = ending = false;
     review = [];
@@ -104,7 +105,7 @@ async function answer(choice) {
 }
 $('next').addEventListener('click', () => {
   if (ending) return finish();
-  if (!upcoming || game.expires <= Date.now()) return finish();
+  if (!upcoming || deadline <= performance.now()) return finish();
   step++;
   showQuestion(upcoming);
 });
