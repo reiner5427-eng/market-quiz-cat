@@ -21,15 +21,25 @@ function updateScore(value, kg) {
   $('score').textContent = value + '점';
   $('weight').textContent = kg + ' kg';
 }
+function showCountryLabels(element, text) {
+  const parts = text.split(/(?<![가-힣])([가나] 나라)/g);
+  element.replaceChildren(...parts.map((part, i) => {
+    if (i % 2 === 0) return part;
+    const label = document.createElement('strong');
+    label.className = part.startsWith('가') ? 'country-ga' : 'country-na';
+    label.textContent = part;
+    return label;
+  }));
+}
 function showQuestion(question) {
   current = question;
   document.getElementById('counter').textContent = (step + 1) + '번 문제';
   $('topic').textContent = topics[question.topic];
-  $('prompt').textContent = question.prompt;
+  showCountryLabels($('prompt'), question.prompt);
   $('choices').replaceChildren(...question.choices.map((option, i) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = '①②③④'[i] + ' ' + option;
+    showCountryLabels(button, '①②③④'[i] + ' ' + option);
     button.addEventListener('click', () => answer(i));
     return button;
   }));
@@ -84,7 +94,7 @@ async function answer(choice) {
     if (!data.correct) buttons[choice].classList.add('wrong');
     const feedback = $('feedback');
     feedback.className = data.correct ? 'good' : 'wrong';
-    feedback.textContent = (data.correct ? '정답! 간식 +1 🐟 · ' : '아쉬워요! ') + explanation;
+    showCountryLabels(feedback, (data.correct ? '정답! 간식 +1 🐟 · ' : '아쉬워요! ') + explanation);
     feedback.hidden = false;
     $('cat-says').textContent = data.correct ? '“냠냠! 간식 맛있다냥!” 🐟' : '“다음 문제도 힘내라냥!”';
     if (data.correct) {
@@ -138,9 +148,9 @@ function showResult(data) {
   $('review').replaceChildren(...review.map(item => {
     const details = document.createElement('details');
     const title = document.createElement('summary');
-    title.textContent = (item.correct ? '맞힌 문제 · ' : '다시 볼 문제 · ') + item.prompt;
+    showCountryLabels(title, (item.correct ? '맞힌 문제 · ' : '다시 볼 문제 · ') + item.prompt);
     const p = document.createElement('p');
-    p.textContent = item.explanation;
+    showCountryLabels(p, item.explanation);
     details.append(title, p);
     return details;
   }));
