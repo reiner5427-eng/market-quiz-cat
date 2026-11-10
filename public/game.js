@@ -14,11 +14,14 @@ function showMessage(message = '') {
   $('message').textContent = message;
   $('message').hidden = !message;
 }
+function showCatGrowth(cat, value) {
+  const fullness = 1 - Math.exp(-value / 65);
+  cat.style.setProperty('--growth', (1 + 1.05 * fullness).toFixed(3));
+  cat.style.setProperty('--blush', (.45 + .55 * fullness).toFixed(3));
+}
 function updateScore(value, kg) {
   score = value;
-  const fullness = 1 - Math.exp(-value / 65);
-  $('cat').style.setProperty('--growth', (1 + 1.05 * fullness).toFixed(3));
-  $('cat').style.setProperty('--blush', (.45 + .55 * fullness).toFixed(3));
+  showCatGrowth($('cat'), value);
   $('score').textContent = value + '점';
   $('weight').textContent = kg + ' kg';
 }
@@ -54,23 +57,28 @@ function tick() {
   $('timebar').value = left;
   if (!left && !busy) finish();
 }
+const catPicker = $('cat-picker');
+const catNames = new Map(Array.from(catPicker.querySelectorAll('input'), input =>
+  [input.value, input.labels[0].textContent.trim()]));
+const selectedCoat = () => catPicker.querySelector('input:checked').value;
 function previewCat() {
-  const selected = $('cat-picker').querySelector('input:checked');
-  const name = selected.labels[0].textContent.trim();
-  $('cat').dataset.coat = selected.value;
+  const coat = selectedCoat();
+  const name = catNames.get(coat);
+  $('cat').dataset.coat = coat;
   $('cat').setAttribute('aria-label', name + ', 간식을 먹을수록 배가 커지는 고양이');
   $('cat-name').textContent = name;
 }
-$('cat-picker').addEventListener('change', previewCat);
+catPicker.addEventListener('change', previewCat);
 previewCat();
 
 $('start').addEventListener('submit', async event => {
   event.preventDefault();
   const button = event.submitter;
   button.disabled = true;
+  catPicker.disabled = true;
   showMessage();
   try {
-    game = await api('start', { nickname: $('nickname').value });
+    game = await api('start', { nickname: $('nickname').value, coat: selectedCoat() });
     deadline = performance.now() + game.remainingMs;
     step = 0;
     busy = ending = false;
@@ -86,6 +94,7 @@ $('start').addEventListener('submit', async event => {
     showMessage(error.message);
   } finally {
     button.disabled = false;
+    catPicker.disabled = false;
   }
 });
 async function answer(choice) {
@@ -175,6 +184,25 @@ $('again').addEventListener('click', () => {
   $('cat-says').textContent = '“야옹! 간식 줄 거냥?”';
   $('nickname').focus();
 });
+function showRankingCat(cell, coat, points) {
+  const name = catNames.get(coat);
+  if (!name) {
+    cell.textContent = '—';
+    cell.setAttribute('aria-label', '고양이 정보 없음');
+    return;
+  }
+  const portrait = $('cat').cloneNode(true);
+  portrait.removeAttribute('id');
+  portrait.removeAttribute('class');
+  portrait.removeAttribute('style');
+  portrait.removeAttribute('role');
+  portrait.removeAttribute('aria-label');
+  portrait.setAttribute('class', 'rank-cat');
+  portrait.setAttribute('aria-hidden', 'true');
+  portrait.dataset.coat = coat;
+  showCatGrowth(portrait, points);
+  cell.append(portrait, name);
+}
 async function loadRanking() {
   $('refresh').disabled = true;
   $('rank-status').textContent = '기록을 불러오는 중이에요.';
@@ -182,10 +210,11 @@ async function loadRanking() {
     const rows = await api('ranking');
     $('board').tBodies[0].replaceChildren(...rows.map(row => {
       const tr = document.createElement('tr');
-      for (const value of [row.rank + '위', row.nickname, row.score + '점', row.weight + ' kg']) {
-        const td = tr.insertCell();
-        td.textContent = value;
-      }
+      tr.insertCell().textContent = row.rank + '위';
+      tr.insertCell().textContent = row.nickname;
+      showRankingCat(tr.insertCell(), row.coat, row.score);
+      tr.insertCell().textContent = row.score + '점';
+      tr.insertCell().textContent = row.weight + ' kg';
       return tr;
     }));
     $('board').hidden = !rows.length;

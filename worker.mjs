@@ -1,4 +1,5 @@
 const ROUND_MS = 120_000;
+const COATS = new Set(['cheese', 'mackerel', 'white', 'gray']);
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -42,12 +43,12 @@ async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
     const { results } = await db.prepare(
       `WITH best AS (
-        SELECT nickname, score, started, id,
+        SELECT nickname, score, coat, started, id,
           ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
         FROM games
         WHERE ranking_eligible = 1 AND finished = 1 AND score > 0
       )
-      SELECT nickname, score FROM best
+      SELECT nickname, score, coat FROM best
       WHERE attempt = 1
       ORDER BY score DESC, started, id LIMIT 30`
     ).all();
@@ -74,11 +75,15 @@ async function api(request, db, route) {
     if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
       return json({ error: '한글 또는 영문이 포함된 2~12자 별명을 입력해 주세요.' }, 400);
     }
+    const coat = body.coat ?? null;
+    if (coat !== null && !COATS.has(coat)) {
+      return json({ error: '고양이를 다시 골라 주세요.' }, 400);
+    }
     const deck = newDeck();
     const id = crypto.randomUUID();
     const started = Date.now();
-    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible) VALUES (?, ?, ?, ?, 1)')
-      .bind(id, nickname, JSON.stringify(deck), started).run();
+    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible, coat) VALUES (?, ?, ?, ?, 1, ?)')
+      .bind(id, nickname, JSON.stringify(deck), started, coat).run();
     return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
   }
 

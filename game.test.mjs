@@ -28,6 +28,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished) VALUES (?, ?, ?, ?, ?, 1)')
       .run('old', '이전기록', '[]', 0, 90);
     db.exec(readFileSync('drizzle/0001_reset_ranking.sql', 'utf8'));
+    db.exec(readFileSync('drizzle/0002_ranking_coat.sql', 'utf8'));
     assert.deepEqual(await data('/api/ranking'), []);
     db.prepare('DELETE FROM games WHERE id = ?').run('old');
     assert.equal((await client('/')).status, 200);
@@ -44,7 +45,8 @@ test('grades once, expires, and shares the top 30 across database connections', 
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
-    const started = await data('/api/start', { nickname: '간식대장' });
+    assert.equal((await client('/api/start', { nickname: '간식대장', coat: 'invalid' })).status, 400);
+    const started = await data('/api/start', { nickname: '간식대장', coat: 'mackerel' });
     assert.equal(started.question.choices.length, 4);
     assert.ok(started.remainingMs > 119_000 && started.remainingMs <= 120_000);
     assert.equal(started.question.correctIndex, undefined);
@@ -70,6 +72,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.prepare('UPDATE games SET started = 0 WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
     assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25' });
+    assert.equal((await data('/api/ranking'))[0].coat, 'mackerel');
     const insert = db.prepare(
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)'
     );
@@ -80,6 +83,12 @@ test('grades once, expires, and shares the top 30 across database connections', 
     insert.run('tieOther', '고양이5', '[]', 41, 30);
     insert.run('caseBest', 'CloudCat', '[]', 43, 40);
     insert.run('caseLower', 'cloudcat', '[]', 44, 30);
+    const setCoat = db.prepare('UPDATE games SET coat = ? WHERE id = ?');
+    setCoat.run('white', 'best');
+    setCoat.run('gray', 'lower');
+    setCoat.run('cheese', 'tie');
+    setCoat.run('cheese', 'caseBest');
+    setCoat.run('mackerel', 'caseLower');
     db.close();
     db = new DatabaseSync(file);
     const board = await data('/api/ranking');
@@ -89,6 +98,9 @@ test('grades once, expires, and shares the top 30 across database connections', 
     ]);
     assert.equal(board.filter(row => row.nickname.toLowerCase() === 'cloudcat').length, 1);
     assert.equal(board.filter(row => row.nickname === '고양이3').length, 1);
+    assert.equal(board[0].coat, 'cheese');
+    assert.equal(board[1].coat, 'white');
+    assert.equal(board[2].coat, null);
     assert.equal(board[29].nickname, '고양이29');
     assert.equal(board[29].rank, 30);
   } finally {
