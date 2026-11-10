@@ -16,8 +16,9 @@ function showMessage(message = '') {
 }
 function updateScore(value, kg) {
   score = value;
-  const growth = 1 + .65 * (1 - Math.exp(-value / 55));
-  document.getElementById('cat').style.setProperty('--growth', growth.toFixed(3));
+  const fullness = 1 - Math.exp(-value / 65);
+  $('cat').style.setProperty('--growth', (1 + 1.05 * fullness).toFixed(3));
+  $('cat').style.setProperty('--blush', (.45 + .55 * fullness).toFixed(3));
   $('score').textContent = value + '점';
   $('weight').textContent = kg + ' kg';
 }
@@ -53,6 +54,16 @@ function tick() {
   $('timebar').value = left;
   if (!left && !busy) finish();
 }
+function previewCat() {
+  const selected = $('cat-picker').querySelector('input:checked');
+  const name = selected.labels[0].textContent.trim();
+  $('cat').dataset.coat = selected.value;
+  $('cat').setAttribute('aria-label', name + ', 간식을 먹을수록 배가 커지는 고양이');
+  $('cat-name').textContent = name;
+}
+$('cat-picker').addEventListener('change', previewCat);
+previewCat();
+
 $('start').addEventListener('submit', async event => {
   event.preventDefault();
   const button = event.submitter;

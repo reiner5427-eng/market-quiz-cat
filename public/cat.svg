@@ -1,14 +1,21 @@
-<svg id="cat" role="img" aria-label="간식을 먹을수록 배가 커지는 주황색 고양이" xmlns="http://www.w3.org/2000/svg" viewBox="-24 0 288 208">
+<svg id="cat" role="img" data-coat="cheese" aria-label="치즈냥이, 간식을 먹을수록 배가 커지는 고양이" xmlns="http://www.w3.org/2000/svg" viewBox="-24 0 288 208">
 <ellipse cx="120" cy="185" rx="93" ry="11" fill="#d89a59" opacity=".22"/>
-<path d="M172 160c55 11 64-41 36-43" fill="none" stroke="#b95e34" stroke-width="18" stroke-linecap="round"/>
-<path d="M173 159c55 11 62-40 35-42" fill="none" stroke="#f6a34e" stroke-width="13" stroke-linecap="round"/>
-<g class="belly"><ellipse cx="120" cy="152" rx="84" ry="41" fill="#ffb460" stroke="#974d36" stroke-width="4"/><ellipse cx="120" cy="155" rx="62" ry="28" fill="#ffdfaa"/><path d="M111 166q9 6 18 0" fill="none" stroke="#e3a66d" stroke-width="3" stroke-linecap="round"/></g><path d="M47 76 42 27q1-13 14-9l39 26q25-7 53 0l36-25q13-6 15 8l-4 53q15 20 10 39c-7 23-48 33-83 33-45 0-82-11-87-33q-4-20 12-43Z" fill="#ffb460" stroke="#974d36" stroke-width="4"/>
+<path d="M172 160c55 11 64-41 36-43" fill="none" stroke="var(--coat-edge, #974d36)" stroke-width="18" stroke-linecap="round"/>
+<path d="M173 159c55 11 62-40 35-42" fill="none" stroke="var(--coat-fur, #ffb460)" stroke-width="13" stroke-linecap="round"/>
+<g class="belly"><ellipse cx="120" cy="163" rx="47" ry="29" fill="var(--coat-fur, #ffb460)" stroke="var(--coat-edge, #974d36)" stroke-width="4"/><ellipse cx="120" cy="166" rx="34" ry="20" fill="var(--coat-cream, #ffdfaa)"/><path d="M114 173q6 4 12 0" fill="none" stroke="var(--coat-detail, #e3a66d)" stroke-width="3" stroke-linecap="round"/></g><path d="M47 76 42 27q1-13 14-9l39 26q25-7 53 0l36-25q13-6 15 8l-4 53q15 20 10 39c-7 23-48 33-83 33-45 0-82-11-87-33q-4-20 12-43Z" fill="var(--coat-fur, #ffb460)" stroke="var(--coat-edge, #974d36)" stroke-width="4"/>
 <path d="m51 30 28 19-25 15Zm137 0-25 19 23 15Z" fill="#ed8a89"/>
-<path d="M102 47q1 17 5 21m13-22v19m17-18-5 21" fill="none" stroke="#dc8245" stroke-width="7" stroke-linecap="round"/>
-<ellipse cx="120" cy="127" rx="44" ry="22" fill="#ffdfaa"/>
-<ellipse cx="65" cy="123" rx="13" ry="8" fill="#f49a91"/><ellipse cx="175" cy="123" rx="13" ry="8" fill="#f49a91"/>
+<g fill="none" stroke="var(--coat-mark, #dc8245)" stroke-linecap="round">
+<path d="M102 47q1 17 5 21m13-22v19m17-18-5 21" stroke-width="7"/>
+<path class="mackerel-stripes" d="m49 78 16 9m-22 4 15 7m130-21-15 9m21 4-14 7m24 57 4 7m7-14 6 4m-2-16 6 2" stroke-width="4"/>
+</g>
+<ellipse cx="120" cy="127" rx="44" ry="22" fill="var(--coat-cream, #ffdfaa)"/>
+<g class="cat-blush"><ellipse cx="65" cy="123" rx="13" ry="8" fill="#f49a91"/><ellipse cx="175" cy="123" rx="13" ry="8" fill="#f49a91"/></g>
 <path d="M74 105q8-12 17 0m58 0q8-12 17 0m-58 20q6 7 12-2 7 9 13 2" fill="none" stroke="#66372d" stroke-width="4" stroke-linecap="round"/>
 <path d="M114 115q6-4 12 0l-6 8Z" fill="#a25552"/>
-<path d="M43 113l-16-5m15 15-16 2m172-12 16-5m-15 15 16 2" stroke="#974d36" stroke-width="3" stroke-linecap="round"/>
-<ellipse cx="84" cy="184" rx="22" ry="10" fill="#ffd091" stroke="#974d36" stroke-width="3"/><ellipse cx="154" cy="184" rx="22" ry="10" fill="#ffd091" stroke="#974d36" stroke-width="3"/>
+<path d="M43 113l-16-5m15 15-16 2m172-12 16-5m-15 15 16 2" stroke="var(--coat-edge, #974d36)" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="84" cy="184" rx="22" ry="10" fill="var(--coat-paw, #ffd091)" stroke="var(--coat-edge, #974d36)" stroke-width="3"/><ellipse cx="154" cy="184" rx="22" ry="10" fill="var(--coat-paw, #ffd091)" stroke="var(--coat-edge, #974d36)" stroke-width="3"/>
+<g class="cat-sparkles" aria-hidden="true" fill="#f2a93b">
+<path d="M21 48l3 9 9 3-9 3-3 9-3-9-9-3 9-3Zm200-9 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/>
+<circle cx="228" cy="77" r="3"/><circle cx="18" cy="86" r="3"/>
+</g>
 </svg>

@@ -19,6 +19,15 @@
 <p class="intro">2분 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요!</p>
 <ul class="topics"><li>시장경제와 가계·기업</li><li>경제성장과 우리 생활</li><li>세계 속의 무역</li></ul>
 <form id="start">
+<fieldset id="cat-picker" class="cat-picker">
+<legend>함께할 고양이 고르기</legend>
+<div class="coat-options">
+<label data-coat="cheese"><input type="radio" name="coat" value="cheese" checked><span class="coat-swatch" aria-hidden="true"></span><span>치즈냥이</span></label>
+<label data-coat="mackerel"><input type="radio" name="coat" value="mackerel"><span class="coat-swatch" aria-hidden="true"></span><span>고등어냥이</span></label>
+<label data-coat="white"><input type="radio" name="coat" value="white"><span class="coat-swatch" aria-hidden="true"></span><span>흰둥이냥이</span></label>
+<label data-coat="gray"><input type="radio" name="coat" value="gray"><span class="coat-swatch" aria-hidden="true"></span><span>회색냥이</span></label>
+</div>
+</fieldset>
 <label for="nickname">나의 별명</label>
 <input id="nickname" required minlength="2" maxlength="12" autocomplete="off" placeholder="예: 간식대장" aria-describedby="privacy">
 <small id="privacy">별명과 점수는 공개 순위에 올라가요.</small>
@@ -45,7 +54,7 @@
 </section>
 <aside class="cat card">
 <p class="eyebrow">나의 고양이</p>
-<h2>간식 기다리는 뚱냥이</h2>
+<h2 id="cat-name">치즈냥이</h2>
 <div class="stage"><!-- CAT_ART --></div>
 <p id="cat-says">“야옹! 간식 줄 거냥?”</p>
 <div class="stats"><div><small>현재 점수</small><strong id="score">0점</strong></div><div><small>뚱냥이 체중</small><strong id="weight">3.00 kg</strong></div></div>
