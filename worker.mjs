@@ -1,6 +1,4 @@
-const ROUND_MS = 90_000;
-const LIMIT = 20;
-const MAX_SCORE = 200;
+const ROUND_MS = 120_000;
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -8,6 +6,7 @@ const shuffle = items => {
   }
   return items;
 };
+const newDeck = () => shuffle(BANK.map((_, i) => i)).map(i => [i, shuffle([0, 1, 2, 3])]);
 const json = (data, status = 200) => Response.json(data, {
   status, headers: { 'cache-control': 'no-store' }
 });
@@ -21,7 +20,7 @@ const weight = score => (3 + score * .025).toFixed(2);
 async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
     const { results } = await db.prepare(
-      'SELECT nickname, score FROM games WHERE finished = 1 AND score > 0 ORDER BY score DESC, started, id LIMIT 20'
+      'SELECT nickname, score FROM games WHERE finished = 1 AND score > 0 ORDER BY score DESC, started, id LIMIT 30'
     ).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
@@ -42,13 +41,12 @@ async function api(request, db, route) {
     if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
       return json({ error: '실명 대신 한글 또는 영문이 포함된 2~12자 별명을 써 주세요.' }, 400);
     }
-    const deck = shuffle(BANK.map((_, i) => i)).slice(0, LIMIT)
-      .map(i => [i, shuffle([0, 1, 2, 3])]);
+    const deck = newDeck();
     const id = crypto.randomUUID();
     const started = Date.now();
     await db.prepare('INSERT INTO games (id, nickname, deck, started) VALUES (?, ?, ?, ?)')
       .bind(id, nickname, JSON.stringify(deck), started).run();
-    return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]), limit: LIMIT });
+    return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
   }
 
   if (!['/api/answer', '/api/finish'].includes(route)) return json({ error: '페이지가 없어요.' }, 404);
@@ -63,17 +61,18 @@ async function api(request, db, route) {
     return final(row.score);
   }
   const { step, choice } = body;
-  if (!Number.isInteger(step) || step < 0 || step >= LIMIT || !Number.isInteger(choice) || choice < 0 || choice > 3) {
+  if (!Number.isInteger(step) || step < 0 || !Number.isInteger(choice) || choice < 0 || choice > 3) {
     return json({ error: '보기를 골라 주세요.' }, 400);
   }
 
   const deck = JSON.parse(game.deck);
+  if (!deck[step]) return game.finished ? final(game.score) : json({ error: '문제 번호를 확인해 주세요.' }, 409);
   const [index, order] = deck[step];
   const correctIndex = order.indexOf(0);
   const correct = choice === correctIndex;
   const feedback = score => json({
     correct, correctIndex, explanation: BANK[index].explanation, score, weight: weight(score),
-    question: step + 1 < LIMIT ? question(deck[step + 1]) : null
+    question: question(deck[step + 1])
   });
   if (!game.finished && game.step === step + 1 && game.last_answer === choice) return feedback(game.score);
   if (game.finished) return final(game.score);
@@ -82,9 +81,14 @@ async function api(request, db, route) {
     return final(row.score);
   }
   if (game.step !== step) return json({ error: '이미 채점된 문제예요.' }, 409);
+  const extra = step === deck.length - 1 ? newDeck() : null;
+  if (extra) {
+    if (extra[0][0] === index) [extra[0], extra[1]] = [extra[1], extra[0]];
+    deck.push(...extra);
+  }
   const row = await db.prepare(
-    'UPDATE games SET step = step + 1, score = score + ?, last_answer = ? WHERE id = ? AND step = ? AND finished = 0 RETURNING score'
-  ).bind(correct ? MAX_SCORE / LIMIT : 0, choice, game.id, step).first();
+    'UPDATE games SET step = step + 1, score = score + ?, last_answer = ?, deck = COALESCE(?, deck) WHERE id = ? AND step = ? AND finished = 0 RETURNING score'
+  ).bind(correct ? 10 : 0, choice, extra ? JSON.stringify(deck) : null, game.id, step).first();
   if (!row) return json({ error: '이미 채점된 문제예요. 같은 보기를 다시 누르면 결과를 불러올 수 있어요.' }, 409);
   return feedback(row.score);
 }

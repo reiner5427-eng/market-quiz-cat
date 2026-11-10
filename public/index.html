@@ -16,7 +16,7 @@
 <div id="welcome">
 <p class="eyebrow">간식 가게에 오신 걸 환영해요!</p>
 <h1>뚱냥이의<br><span>시장경제 퀴즈</span></h1>
-<p class="intro">90초 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요!</p>
+<p class="intro">2분 동안 문제를 풀고 뚱냥이에게 간식을 주세요. 정답 하나마다 <strong>10점</strong>과 <strong>0.25 kg</strong>을 얻어요!</p>
 <ul class="topics"><li>시장경제와 가계·기업</li><li>경제성장과 우리 생활</li><li>세계 속의 무역</li></ul>
 <form id="start">
 <label for="nickname">나의 별명</label>
@@ -27,7 +27,7 @@
 </div>
 <div id="playing" hidden>
 <div class="progress"><span id="counter"></span><span id="clock" role="timer"></span></div>
-<progress id="timebar" max="90" value="90" aria-label="남은 시간"></progress>
+<progress id="timebar" max="120" value="120" aria-label="남은 시간"></progress>
 <p id="topic" class="eyebrow"></p>
 <h2 id="prompt" tabindex="-1"></h2>
 <div id="choices"></div>
@@ -46,14 +46,14 @@
 <aside class="cat card">
 <p class="eyebrow">나의 고양이</p>
 <h2>간식 기다리는 뚱냥이</h2>
-<div class="stage"><img id="cat" src="/cat.svg" width="240" height="205" alt="볼이 분홍색인 주황색 고양이"></div>
+<div class="stage"><!-- CAT_ART --></div>
 <p id="cat-says">“야옹! 간식 줄 거냥?”</p>
 <div class="stats"><div><small>현재 점수</small><strong id="score">0점</strong></div><div><small>뚱냥이 체중</small><strong id="weight">3.00 kg</strong></div></div>
 </aside>
 </div>
 <section class="rank card" aria-labelledby="rank-title">
 <div class="rankhead"><div><p class="eyebrow">모두의 간식 기록</p><h2 id="rank-title">🏆 명예의 전당</h2></div><button id="refresh">새로고침</button></div>
-<p class="intro">함께 플레이한 친구들의 1~20위 기록이에요. 동점이면 먼저 시작한 기록이 앞서요.</p>
+<p class="intro">함께 플레이한 친구들의 1~30위 기록이에요. 동점이면 먼저 시작한 기록이 앞서요.</p>
 <p id="rank-status" role="status"></p>
 <table id="board" hidden><thead><tr><th scope="col">순위</th><th scope="col">별명</th><th scope="col">점수</th><th scope="col">체중</th></tr></thead><tbody></tbody></table>
 </section>

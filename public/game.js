@@ -16,13 +16,14 @@ function showMessage(message = '') {
 }
 function updateScore(value, kg) {
   score = value;
+  const growth = 1 + .65 * (1 - Math.exp(-value / 55));
+  document.getElementById('cat').style.setProperty('--growth', growth.toFixed(3));
   $('score').textContent = value + '점';
   $('weight').textContent = kg + ' kg';
-  $('cat').style.width = Math.min(310, 190 + value * .6) + 'px';
 }
 function showQuestion(question) {
   current = question;
-  $('counter').textContent = (step + 1) + ' / ' + game.limit + '번';
+  document.getElementById('counter').textContent = (step + 1) + '번 문제';
   $('topic').textContent = topics[question.topic];
   $('prompt').textContent = question.prompt;
   $('choices').replaceChildren(...question.choices.map((option, i) => {

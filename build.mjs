@@ -22,7 +22,10 @@ for (const [route, file, type] of [
   ['/style.css', 'style.css', 'text/css; charset=utf-8'],
   ['/game.js', 'game.js', 'text/javascript; charset=utf-8'],
   ['/cat.svg', 'cat.svg', 'image/svg+xml']
-]) assets[route] = [type, readFileSync('public/' + file, 'utf8')];
+]) {
+  const source = readFileSync('public/' + file, 'utf8');
+  assets[route] = [type, file === 'index.html' ? source.replace('<!-- CAT_ART -->', readFileSync('public/cat.svg', 'utf8')) : source];
+}
 
 mkdirSync('dist/server', { recursive: true });
 mkdirSync('dist/.openai', { recursive: true });

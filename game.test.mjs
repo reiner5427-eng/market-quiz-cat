@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import worker from './dist/server/index.js';
 
-test('grades once, expires, and shares the top 20 across database connections', async () => {
+test('grades once, expires, and shares the top 30 across database connections', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'quiz-'));
   const file = join(dir, 'game.sqlite');
   let db = new DatabaseSync(file);
@@ -29,9 +29,10 @@ test('grades once, expires, and shares the top 20 across database connections', 
     assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
     const started = await data('/api/start', { nickname: '간식대장' });
     assert.equal(started.question.choices.length, 4);
+    assert.ok(started.remainingMs > 119_000 && started.remainingMs <= 120_000);
     assert.equal(started.question.correctIndex, undefined);
     const deck = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(started.id).deck);
-    assert.equal(new Set(deck.map(q => q[0])).size, 20);
+    assert.equal(new Set(deck.map(q => q[0])).size, 100);
     const answer = { id: started.id, step: 0, choice: deck[0][1].indexOf(0) };
     const first = await data('/api/answer', answer);
     assert.equal(first.score, 10);
@@ -42,20 +43,27 @@ test('grades once, expires, and shares the top 20 across database connections', 
     const wrong = await data('/api/answer', { ...answer, step: 1, choice: (deck[1][1].indexOf(0) + 1) % 4 });
     assert.equal(wrong.correct, false);
     assert.equal(wrong.score, 10);
+    db.prepare('UPDATE games SET step = 99 WHERE id = ?').run(started.id);
+    const boundary = await data('/api/answer', { ...answer, step: 99, choice: (deck[99][1].indexOf(0) + 1) % 4 });
+    assert.ok(boundary.question);
+    const extended = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(started.id).deck);
+    assert.equal(extended.length, 200);
+    assert.equal(new Set(extended.slice(100).map(q => q[0])).size, 100);
+    assert.notEqual(extended[99][0], extended[100][0]);
     db.prepare('UPDATE games SET started = 0 WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
     assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25' });
-    for (let i = 1; i <= 25; i++) {
+    for (let i = 1; i <= 35; i++) {
       db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished) VALUES (?, ?, ?, ?, ?, 1)')
         .run('test' + i, '고양이' + i, '[]', i, 20);
     }
     db.close();
     db = new DatabaseSync(file);
     const board = await data('/api/ranking');
-    assert.equal(board.length, 20);
+    assert.equal(board.length, 30);
     assert.equal(board[0].nickname, '고양이1');
-    assert.equal(board[19].nickname, '고양이20');
-    assert.equal(board[19].rank, 20);
+    assert.equal(board[29].nickname, '고양이30');
+    assert.equal(board[29].rank, 30);
   } finally {
     db.close();
     rmSync(dir, { recursive: true, force: true });
