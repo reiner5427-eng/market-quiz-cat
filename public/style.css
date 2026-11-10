@@ -59,3 +59,17 @@ svg[data-coat="mackerel"] .mackerel-stripes{display:inline}
 [data-coat="tuxedo"] .coat-swatch{background:linear-gradient(125deg,var(--coat-fur) 50%,var(--coat-cream) 50%)}
 .tuxedo-blaze{display:none}
 svg[data-coat="tuxedo"] .tuxedo-blaze{display:inline}
+
+@font-face {
+  font-family: "Jua Intro";
+  src: url("/intro-jua.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+#welcome{font-family:"Jua Intro",system-ui,"Malgun Gothic",sans-serif}
+#welcome h1{font-weight:400;letter-spacing:-.025em}
+#welcome .intro{font-size:1.08rem}
+#welcome :is(.eyebrow,.topics li,legend,label,button){font-weight:400}
+#welcome .primary{font-size:1.12rem}
+#welcome #nickname{font-family:system-ui,"Malgun Gothic",sans-serif}

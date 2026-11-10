@@ -144,8 +144,10 @@ export default {
     }
     const asset = ASSETS[path];
     if (!asset || request.method !== 'GET') return new Response('페이지를 찾을 수 없어요.', { status: 404 });
-    return new Response(asset[1], { headers: {
-      'content-type': asset[0],
+    const [contentType, content, binary] = asset;
+    const body = binary ? Uint8Array.from(atob(content), character => character.charCodeAt(0)) : content;
+    return new Response(body, { headers: {
+      'content-type': contentType,
       'x-content-type-options': 'nosniff',
       'referrer-policy': 'no-referrer',
       'content-security-policy': "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
