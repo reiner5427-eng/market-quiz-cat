@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 const topics = { A: '시장경제와 가계·기업', B: '경제성장과 우리 생활', C: '세계 속의 무역' };
-let game, deadline, timer, step, current, upcoming, busy, ending, score, review;
+let game, deadline, timer, step, current, upcoming, busy, ending, review;
 
 async function api(route, body) {
   const response = await fetch('/api/' + route, body ? {
@@ -20,7 +20,6 @@ function showCatGrowth(cat, value) {
   cat.style.setProperty('--blush', (.45 + .55 * fullness).toFixed(3));
 }
 function updateScore(value, kg) {
-  score = value;
   showCatGrowth($('cat'), value);
   $('score').textContent = value + '점';
   $('weight').textContent = kg + ' kg';
@@ -129,7 +128,7 @@ async function answer(choice) {
     if (!data.correct) buttons[choice].classList.add('wrong');
     const feedback = $('feedback');
     feedback.className = data.correct ? 'good' : 'wrong';
-    showCountryLabels(feedback, (data.correct ? '정답! 간식 +1 🐟 · ' : '아쉬워요! ') + explanation);
+    showCountryLabels(feedback, (data.correct ? '정답! 간식 +1 🐟 · ' : '오답! 하트 −1 · ') + explanation);
     feedback.hidden = false;
     $('cat-says').textContent = data.correct ? '“냠냠! 간식 맛있다냥!” 🐟' : '“다음 문제도 힘내라냥!”';
     if (data.correct) {
@@ -182,7 +181,7 @@ function showResult(data, lastExplanation = '') {
   const lastAnswer = $('last-answer');
   lastAnswer.hidden = !lastExplanation;
   if (lastExplanation) showCountryLabels(lastAnswer, lastExplanation);
-  $('summary').textContent = '간식 ' + score / 10 + '개 · ' + score + '점 · ' + data.weight + ' kg';
+  $('summary').textContent = '정답 ' + data.correctCount + '개 · ' + data.score + '점 · ' + data.weight + ' kg';
   $('cat-says').textContent = '“함께 놀아서 즐거웠다냥!”';
   $('review').replaceChildren(...review.map(item => {
     const details = document.createElement('details');

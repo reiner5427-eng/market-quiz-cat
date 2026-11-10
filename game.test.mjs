@@ -30,6 +30,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.exec(readFileSync('drizzle/0001_reset_ranking.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0002_ranking_coat.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0003_expand_cat_coats.sql', 'utf8'));
+    db.exec(readFileSync('drizzle/0004_score_penalty.sql', 'utf8'));
     db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)')
       .run('previous', '이전시즌', '[]', 1, 200);
     assert.deepEqual(await data('/api/ranking'), []);
@@ -66,37 +67,45 @@ test('grades once, expires, and shares the top 30 across database connections', 
     assert.deepEqual(await data('/api/answer', answer), first);
     const wrong = await data('/api/answer', { ...answer, step: 1, choice: (deck[1][1].indexOf(0) + 1) % 4 });
     assert.equal(wrong.correct, false);
-    assert.equal(wrong.score, 10);
+    assert.equal(wrong.score, 0);
+    assert.equal(wrong.weight, '3.00');
     assert.equal(wrong.lives, 4);
+    assert.equal(wrong.correctCount, 1);
     db.prepare('UPDATE games SET step = 99, score = 980 WHERE id = ?').run(started.id);
     const boundary = await data('/api/answer', { ...answer, step: 99, choice: (deck[99][1].indexOf(0) + 1) % 4 });
     assert.ok(boundary.question);
+    assert.equal(boundary.score, 970);
+    assert.equal(boundary.weight, '27.25');
     const extended = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(started.id).deck);
     assert.equal(extended.length, 200);
     assert.equal(new Set(extended.slice(100).map(q => q[0])).size, 100);
     assert.notEqual(extended[99][0], extended[100][0]);
-    db.prepare('UPDATE games SET started = 0, step = 2, score = 10 WHERE id = ?').run(started.id);
+    db.prepare('UPDATE games SET started = 0, step = 2, score = 10, mistakes = NULL WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
-    assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25', lives: 4 });
+    assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25', lives: 4, correctCount: 1 });
     assert.equal((await data('/api/ranking'))[0].coat, 'tuxedo');
     const second = await data('/api/start', { nickname: '하트점검' });
     const secondDeck = JSON.parse(db.prepare('SELECT deck FROM games WHERE id = ?').get(second.id).deck);
     const secondAnswer = (step, correct) => ({
       id: second.id, step, choice: (secondDeck[step][1].indexOf(0) + (correct ? 0 : 1)) % 4
     });
-    assert.equal((await data('/api/answer', secondAnswer(0, true))).lives, 5);
-    for (let step = 1; step <= 5; step++) {
-      const submitted = secondAnswer(step, false);
+    for (let step = 0; step < 6; step++) {
+      assert.equal((await data('/api/answer', secondAnswer(step, true))).lives, 5);
+    }
+    for (let miss = 1; miss <= 5; miss++) {
+      const submitted = secondAnswer(5 + miss, false);
       const graded = await data('/api/answer', submitted);
-      assert.equal(graded.lives, 5 - step);
-      assert.equal(graded.finished, step === 5);
-      assert.equal(graded.score, 10);
-      assert.equal(Boolean(graded.question), step < 5);
+      assert.equal(graded.lives, 5 - miss);
+      assert.equal(graded.finished, miss === 5);
+      assert.equal(graded.score, 60 - 10 * miss);
+      assert.equal(graded.weight, (4.5 - .25 * miss).toFixed(2));
+      assert.equal(graded.correctCount, 6);
+      assert.equal(Boolean(graded.question), miss < 5);
       assert.ok(graded.explanation);
       assert.deepEqual(await data('/api/answer', submitted), graded);
     }
-    assert.deepEqual(await data('/api/answer', secondAnswer(6, true)),
-      { finished: true, score: 10, weight: '3.25', lives: 0 });
+    assert.deepEqual(await data('/api/answer', secondAnswer(11, true)),
+      { finished: true, score: 10, weight: '3.25', lives: 0, correctCount: 6 });
     assert.ok((await data('/api/ranking')).some(row => row.nickname === '하트점검' && row.score === 10));
     const insert = db.prepare(
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)'
