@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import worker from './dist/server/index.js';
 
-test('grades once, expires, and shares the top 30 across database connections', async () => {
+test('grades once, expires, and shares the top 50 across database connections', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'quiz-'));
   const file = join(dir, 'game.sqlite');
   let db = new DatabaseSync(file);
@@ -110,7 +110,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     const insert = db.prepare(
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)'
     );
-    for (let i = 1; i <= 35; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
+    for (let i = 1; i <= 55; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
     insert.run('best', '고양이3', '[]', 40, 30);
     insert.run('lower', '고양이3', '[]', 41, 10);
     insert.run('tie', '고양이3', '[]', 42, 30);
@@ -126,7 +126,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.close();
     db = new DatabaseSync(file);
     const board = await data('/api/ranking');
-    assert.equal(board.length, 30);
+    assert.equal(board.length, 50);
     assert.deepEqual(board.slice(0, 4).map(row => [row.nickname, row.score]), [
       ['CloudCat', 40], ['고양이3', 30], ['고양이5', 30], ['고양이1', 20]
     ]);
@@ -135,8 +135,8 @@ test('grades once, expires, and shares the top 30 across database connections', 
     assert.equal(board[0].coat, 'cheese');
     assert.equal(board[1].coat, 'white');
     assert.equal(board[2].coat, null);
-    assert.equal(board[29].nickname, '고양이29');
-    assert.equal(board[29].rank, 30);
+    assert.equal(board[49].nickname, '고양이49');
+    assert.equal(board[49].rank, 50);
   } finally {
     db.close();
     rmSync(dir, { recursive: true, force: true });
