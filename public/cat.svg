@@ -8,11 +8,15 @@
 <path d="M102 47q1 17 5 21m13-22v19m17-18-5 21" stroke-width="7"/>
 <path class="mackerel-stripes" d="m49 78 16 9m-22 4 15 7m130-21-15 9m21 4-14 7m24 57 4 7m7-14 6 4m-2-16 6 2" stroke-width="4"/>
 </g>
+<path class="tuxedo-blaze" d="M119 81c-4 17-12 26-23 34l24 17 24-17c-11-8-19-17-23-34Z" fill="var(--coat-cream)"/>
 <ellipse cx="120" cy="127" rx="44" ry="22" fill="var(--coat-cream, #ffdfaa)"/>
 <g class="cat-blush"><ellipse cx="65" cy="123" rx="13" ry="8" fill="#f49a91"/><ellipse cx="175" cy="123" rx="13" ry="8" fill="#f49a91"/></g>
-<path d="M74 105q8-12 17 0m58 0q8-12 17 0m-58 20q6 7 12-2 7 9 13 2" fill="none" stroke="#66372d" stroke-width="4" stroke-linecap="round"/>
+<g fill="none" stroke-width="4" stroke-linecap="round">
+<path d="M74 105q8-12 17 0m58 0q8-12 17 0" stroke="var(--coat-eyes, #66372d)"/>
+<path d="M108 125q6 7 12-2 7 9 13 2" stroke="#66372d"/>
+</g>
 <path d="M114 115q6-4 12 0l-6 8Z" fill="#a25552"/>
-<path d="M43 113l-16-5m15 15-16 2m172-12 16-5m-15 15 16 2" stroke="var(--coat-edge, #974d36)" stroke-width="3" stroke-linecap="round"/>
+<path d="M43 113l-16-5m15 15-16 2m172-12 16-5m-15 15 16 2" stroke="var(--coat-whiskers, var(--coat-edge, #974d36))" stroke-width="3" stroke-linecap="round"/>
 <ellipse cx="84" cy="184" rx="22" ry="10" fill="var(--coat-paw, #ffd091)" stroke="var(--coat-edge, #974d36)" stroke-width="3"/><ellipse cx="154" cy="184" rx="22" ry="10" fill="var(--coat-paw, #ffd091)" stroke="var(--coat-edge, #974d36)" stroke-width="3"/>
 <g class="cat-sparkles" aria-hidden="true" fill="#f2a93b">
 <path d="M21 48l3 9 9 3-9 3-3 9-3-9-9-3 9-3Zm200-9 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/>

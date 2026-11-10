@@ -29,6 +29,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
       .run('old', '이전기록', '[]', 0, 90);
     db.exec(readFileSync('drizzle/0001_reset_ranking.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0002_ranking_coat.sql', 'utf8'));
+    db.exec(readFileSync('drizzle/0003_expand_cat_coats.sql', 'utf8'));
     assert.deepEqual(await data('/api/ranking'), []);
     db.prepare('DELETE FROM games WHERE id = ?').run('old');
     assert.equal((await client('/')).status, 200);
@@ -46,7 +47,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
       assert.equal(allowed.status, 200, nickname);
     }
     assert.equal((await client('/api/start', { nickname: '간식대장', coat: 'invalid' })).status, 400);
-    const started = await data('/api/start', { nickname: '간식대장', coat: 'mackerel' });
+    const started = await data('/api/start', { nickname: '간식대장', coat: 'tuxedo' });
     assert.equal(started.question.choices.length, 4);
     assert.ok(started.remainingMs > 119_000 && started.remainingMs <= 120_000);
     assert.equal(started.question.correctIndex, undefined);
@@ -72,7 +73,7 @@ test('grades once, expires, and shares the top 30 across database connections', 
     db.prepare('UPDATE games SET started = 0 WHERE id = ?').run(started.id);
     assert.equal((await data('/api/answer', { ...answer, step: 2 })).finished, true);
     assert.deepEqual(await data('/api/finish', { id: started.id }), { finished: true, score: 10, weight: '3.25' });
-    assert.equal((await data('/api/ranking'))[0].coat, 'mackerel');
+    assert.equal((await data('/api/ranking'))[0].coat, 'tuxedo');
     const insert = db.prepare(
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 1)'
     );

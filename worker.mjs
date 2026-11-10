@@ -1,5 +1,5 @@
 const ROUND_MS = 120_000;
-const COATS = new Set(['cheese', 'mackerel', 'white', 'gray']);
+const COATS = new Set(['cheese', 'mackerel', 'white', 'gray', 'tuxedo']);
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -43,7 +43,7 @@ async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
     const { results } = await db.prepare(
       `WITH best AS (
-        SELECT nickname, score, coat, started, id,
+        SELECT nickname, score, COALESCE(cat_coat, coat) AS coat, started, id,
           ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
         FROM games
         WHERE ranking_eligible = 1 AND finished = 1 AND score > 0
@@ -82,7 +82,7 @@ async function api(request, db, route) {
     const deck = newDeck();
     const id = crypto.randomUUID();
     const started = Date.now();
-    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible, coat) VALUES (?, ?, ?, ?, 1, ?)')
+    await db.prepare('INSERT INTO games (id, nickname, deck, started, ranking_eligible, cat_coat) VALUES (?, ?, ?, ?, 1, ?)')
       .bind(id, nickname, JSON.stringify(deck), started, coat).run();
     return json({ id, remainingMs: Math.max(0, started + ROUND_MS - Date.now()), question: question(deck[0]) });
   }

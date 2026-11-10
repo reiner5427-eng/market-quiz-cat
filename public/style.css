@@ -54,3 +54,8 @@ svg[data-coat="mackerel"] .mackerel-stripes{display:inline}
 @keyframes sparkle{30%{opacity:1}100%{opacity:0}}
 
 .rank-cat{display:block;width:48px;max-width:100%;height:auto}
+
+[data-coat="tuxedo"]{--coat-fur:#34323c;--coat-cream:#fff8ef;--coat-paw:#fff8ef;--coat-edge:#211f29;--coat-mark:#34323c;--coat-detail:#d4b8b7;--coat-eyes:#f6d58f;--coat-whiskers:#9e8995}
+[data-coat="tuxedo"] .coat-swatch{background:linear-gradient(125deg,var(--coat-fur) 50%,var(--coat-cream) 50%)}
+.tuxedo-blaze{display:none}
+svg[data-coat="tuxedo"] .tuxedo-blaze{display:inline}

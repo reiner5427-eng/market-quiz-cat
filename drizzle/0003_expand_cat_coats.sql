@@ -1,0 +1,1 @@
+ALTER TABLE games ADD COLUMN cat_coat TEXT;
