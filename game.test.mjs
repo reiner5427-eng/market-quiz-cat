@@ -51,7 +51,11 @@ test('grades once, expires, and shares the top 200 across database connections',
       '코카인', '펜타닐', 'v0dka', 'm3th', 'w1ne', 'w33d', 'cocaine', 'tobacco', '뿌지직', '뿌지지직', '뿌1지직', '똥', '똥고양이',
       '응가', '응가대장', '응_가', '오줌냥이', '방귀대장', '여친', '남친', '여자친구', '남자친구',
       '여 자 친 구', '남1친', '전여친', '미래남친', '여자칭구', 'girlfriend', 'boyfriend', 'poop', 'fart',
-      '실업자', '실업자고양이', '실패', '실1패', '망함', '깔아뭉갬', '깔아뭉개', '깔아_뭉갬', '백수', 'failure']) {
+      '실업자', '실업자고양이', '실패', '실1패', '망함', '깔아뭉갬', '깔아뭉개', '깔아_뭉갬', '백수', 'failure', '약빨다', '약빤', '약빤고양이', '약1빤', '약빠는냥이',
+      '약을 하다', '약을하다', '약 을 하 다', '약을한냥이', '약물중독', '약에취함', '뽕맞은고양이',
+      '도박', '도1박', '도박왕', '노름', '카지노', '바카라', '홀덤', '블랙잭', '룰렛', '슬롯머신',
+      '스포츠토토', '토토', '토토왕', '토토사이트', '돈내기', '잭팟', '로또', '복권', '불법배팅', '베팅왕',
+      'CASINO', 'c4s1no', 'gambling', 'poker', 'betting', 'ondrugs', 'stoned', 'drugdealer']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.equal((await rejected.json()).error, '사용할 수 없는 표현이 포함되어 있습니다.', nickname);
@@ -60,7 +64,8 @@ test('grades once, expires, and shares the top 200 across database connections',
     for (const nickname of ['푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
       '약속친구', '대마법사', '대마왕', '단호박죽', '눈물의승리', '절망을이겨낸', 'AmethystCat', 'SeaweedCat',
       'TweedCat', 'PotatoCat', 'Cracker', '소주제달인', '우리친구', '친절냥이', '장애인친구', '변신고양이', '대변인',
-      '방구석고양이', '별빛가루']) {
+      '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
+      '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -126,7 +131,8 @@ test('grades once, expires, and shares the top 200 across database connections',
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)'
     );
     const moderatedNames = ['인생 나락간', '니얼굴', '느금마', '술꾼', '담배', '자살', '마약', 'lifesucks', '뿌지직', '똥고양이', '응가대장', '남자친구', '여친',
-      '실업자', '실패한고양이', '인생망함', '깔아뭉갬'];
+      '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
+      '도박왕', '카지노', '스포츠토토', 'gambling'];
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
