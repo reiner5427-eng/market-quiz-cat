@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import worker from './dist/server/index.js';
 
-test('grades once, expires, and shares the top 100 across database connections', async () => {
+test('grades once, expires, and shares the top 200 across database connections', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'quiz-'));
   const file = join(dir, 'game.sqlite');
   let db = new DatabaseSync(file);
@@ -39,13 +39,24 @@ test('grades once, expires, and shares the top 100 across database connections',
     assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
     for (const nickname of ['씨발고양이', '시1발', 'ㅅ_ㅂ', '일 베', '일1베', '앙기모띠', '기 모 띠',
       '기모찌', '야_동', '섹 1 스', 'FUCK', 'ＦＵＣＫ', 'f_u_c_k', 'fvck', 'sh1t',
-      'b1tch', 's3x', 'p0rn', 'DICKHEAD', '씨\u200b발']) {
+      'b1tch', 's3x', 'p0rn', 'DICKHEAD', '씨\u200b발', '니얼굴', '니 얼 굴', '느금마', '느앰',
+      '니애미', '니1애미', '느그엄마', '니면상']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.equal((await rejected.json()).error, '비속어는 사용할 수 없습니다.');
     }
+    for (const nickname of ['인생 나락간', '인생_나락간', '인1생나락간', '망한인생', '자살', '자1살', '자_해',
+      '죽고싶다', '살기싫어', '쓸모없는나', 'SU1CIDE', 'self_harm', 'lifesucks', '소주한잔', '소 주', '술꾼',
+      '술먹는냥이', '술', '담배', '담1배', '흡연냥이', '니코틴', '마약', '필로폰', '대마초', '대마',
+      '코카인', '펜타닐', 'v0dka', 'm3th', 'w1ne', 'w33d', 'cocaine', 'tobacco']) {
+      const rejected = await client('/api/start', { nickname });
+      assert.equal(rejected.status, 400, nickname);
+      assert.equal((await rejected.json()).error, '사용할 수 없는 표현이 포함되어 있습니다.', nickname);
+    }
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM games').get().count, 0);
-    for (const nickname of ['푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구']) {
+    for (const nickname of ['푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
+      '약속친구', '대마법사', '대마왕', '단호박죽', '눈물의승리', '절망을이겨낸', 'AmethystCat', 'SeaweedCat',
+      'TweedCat', 'PotatoCat', 'Cracker', '소주제달인']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -110,7 +121,17 @@ test('grades once, expires, and shares the top 100 across database connections',
     const insert = db.prepare(
       'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)'
     );
-    for (let i = 1; i <= 105; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
+    const moderatedNames = ['인생 나락간', '니얼굴', '느금마', '술꾼', '담배', '자살', '마약', 'lifesucks'];
+    for (const [i, nickname] of moderatedNames.entries()) {
+      insert.run('blocked' + i, nickname, '[]', i, 500);
+      insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
+    }
+    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 0, 2)')
+      .run('active', '인생 나락간', '[]', 1, 10);
+    assert.ok(!(await data('/api/ranking')).some(row => moderatedNames.includes(row.nickname)));
+    assert.equal(db.prepare("SELECT COUNT(*) AS count FROM games WHERE id LIKE 'blocked%'").get().count, 0);
+    assert.equal(db.prepare("SELECT finished FROM games WHERE id = 'active'").get().finished, 0);
+    for (let i = 1; i <= 205; i++) insert.run('test' + i, '고양이' + i, '[]', i, 20);
     insert.run('best', '고양이3', '[]', 40, 30);
     insert.run('lower', '고양이3', '[]', 41, 10);
     insert.run('tie', '고양이3', '[]', 42, 30);
@@ -126,7 +147,7 @@ test('grades once, expires, and shares the top 100 across database connections',
     db.close();
     db = new DatabaseSync(file);
     const board = await data('/api/ranking');
-    assert.equal(board.length, 100);
+    assert.equal(board.length, 200);
     assert.deepEqual(board.slice(0, 4).map(row => [row.nickname, row.score]), [
       ['CloudCat', 40], ['고양이3', 30], ['고양이5', 30], ['고양이1', 20]
     ]);
@@ -141,6 +162,11 @@ test('grades once, expires, and shares the top 100 across database connections',
     assert.equal(board[50].nickname, '고양이50');
     assert.equal(board[99].rank, 100);
     assert.equal(board[99].nickname, '고양이99');
+    assert.equal(board[100].rank, 101);
+    assert.equal(board[149].rank, 150);
+    assert.equal(board[150].rank, 151);
+    assert.equal(board[199].rank, 200);
+    assert.equal(board[199].nickname, '고양이199');
   } finally {
     db.close();
     rmSync(dir, { recursive: true, force: true });
