@@ -30,7 +30,7 @@ const blockedEnglish = /f+u+c+k+|fuk|fvck|fck|phuck|fucken|muthaf|sh+i+t+|shyt|b
 const blockedEnglishWord = /^(?:ass|arse|cock|dick|damn|hell|cunt|fag|sex|sexx|sexy|xxx|cum|cumming|nude|nudes|rape|rapist|wtf|stfu|fml|suck|sucks|crap)$/;
 const leet = { 0: 'o', 1: 'i', 2: 'z', 3: 'e', 4: 'a', 5: 's', 6: 'g', 7: 't', 8: 'b', 9: 'g', '@': 'a', '$': 's', '!': 'i', '+': 't' };
 
-const blockedNegativeKorean = /자살|자해|자해러|죽고싶|죽을래|죽어버|죽어라|살기싫|살고싶지않|사라지고싶|인생나락|나락간|나락행|망한인생|인생망|인생끝|인생포기|인생실패|인간쓰레기|쓰레기인생|인생쓰레기|쓸모없|가치없|태어나지말|태어난게죄|패배자인생|도태인생|무능한나|실업자|무직|백수|실패|망함|망했|망해|망한|폭망|낙오자|패배자|루저|깔아뭉/;
+const blockedNegativeKorean = /자살|자해|자해러|죽고싶|죽을래|죽어버|죽어라|살기싫|살고싶지않|사라지고싶|인생나락|나락간|나락행|망한인생|인생망|인생끝|인생포기|인생실패|인간쓰레기|쓰레기인생|인생쓰레기|쓸모없|가치없|태어나지말|태어난게죄|패배자인생|도태인생|무능한나|실업자|무직|백수|실패|(?<!희)망(?:함|했|해|한)|폭망|낙오자|패배자|루저|깔아뭉/;
 const blockedNegativeEnglish = /suicid|selfharm|killmyself|wanttodie|wannadie|betteroffdead|hatemylife|lifesucks|mylifeisover|worthless|hopeless|bornloser/;
 const blockedNegativeEnglishWord = /^(?:failure|loser|unemployed)$/;
 const blockedSubstancesKorean = /술꾼|술쟁|술마시|술먹|술취|술좋|술사랑|술한잔|술잔|술집|술병|술안주|술파티|술중독|음주|숙취|소주(?!제)|맥주|막걸리|위스키|보드카|데킬라|테킬라|샴페인|고량주|칵테일|담배|흡연|꼴초|니코틴|스누스|마약|약쟁|약빨|약빤|약빠는|약을빨|약을빤|약중독|약에취|약에쩔|약물|뽕빤|뽕맞|뽕에취|대마피|대마폈|뽕쟁|필로폰|히로뽕|코카인|헤로인|펜타닐|엑스터시|대마초|대마흡|케타민|엘에스디|해시시/;
@@ -40,8 +40,8 @@ const blockedSubstancesEnglishWord = /^(?:alcohol|beer|wine|drunk|tipsy|sake|met
 
 const blockedCrudeKorean = /똥|응가|응아|응까|오줌|쉬야|분변|분뇨|배설|뿌+지+직|푸+지+직|뿌직|푸직|방귀|방구(?!석)|코딱지|토사물|가래침/;
 const blockedCrudeKoreanWord = /^(?:대변|소변|설사)(?:[0-9]*)$/;
-const blockedRelationshipKorean = /여친|남친|여자친구|남자친구|여자칭구|남자칭구|걸프렌드|걸프랜드|보이프렌드|보이프랜드|여자애인|남자애인/;
-const blockedRelationshipEnglish = /girlfriend|boyfriend/;
+const blockedRelationshipKorean = /여친|남친|여자친구|남자친구|여자칭구|남자칭구|걸프렌드|걸프랜드|보이프렌드|보이프랜드|여자애인|남자애인|커플|커풀|헤어져라|헤어져버려|헤어져줘|헤어지세요|헤어졌으면|헤어지길|헤어지자/;
+const blockedRelationshipEnglish = /girlfriend|boyfriend|couple|breakup|breakthemup|splitup/;
 const blockedCrudeEnglishWord = /^(?:poop|poopy|pee|piss|puke|fart|feces|faeces|diarrhea)$/;
 
 const blockedDrugUseKorean = /(?<![절계서공요도한])약(?:을(?:하|해|했|한)|하는|하자|하러)/;
@@ -49,6 +49,8 @@ const blockedGamblingKorean = /도박|노름|카지노|바카라|홀덤|블랙�
 const blockedGamblingKoreanWord = /^(?:토토|베팅|배팅)(?:[0-9]*)$/;
 const blockedGamblingEnglish = /casino|gambl|baccarat|blackjack|roulette|sportsbook|bookmaker|jackpot|slotmachine|sportsbet|betting|lottery|lotto/;
 const blockedGamblingEnglishWord = /^(?:bet|bets|poker|slot|slots)$/;
+
+const blockedCustomKorean = /쮸쮸|빼빼로/;
 
 function nicknameWarning(nickname) {
   const normalized = nickname.normalize('NFKC').toLowerCase().replace(/[\p{M}\p{Cf}]/gu, '');
@@ -80,7 +82,7 @@ function nicknameWarning(nickname) {
       blockedGamblingKorean.test(korean) || blockedGamblingKoreanWord.test(korean) ||
       tokens.some(word => blockedGamblingKoreanWord.test(word)) ||
       blockedGamblingEnglish.test(compact) || blockedGamblingEnglishWord.test(compact) ||
-      words.some(word => blockedGamblingEnglishWord.test(word))) {
+      words.some(word => blockedGamblingEnglishWord.test(word)) || blockedCustomKorean.test(korean)) {
     return '사용할 수 없는 표현이 포함되어 있습니다.';
   }
   return '';
