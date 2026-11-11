@@ -80,6 +80,6 @@ svg[data-coat="tuxedo"] .tuxedo-blaze{display:inline}
 .empty-hearts{color:#715851}
 #last-answer{padding:12px;border:1px solid #dba392;border-radius:12px;background:#ffede7}
 
-.rank-pages{display:flex;justify-content:center;gap:8px;margin-top:16px}
+.rank-pages{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
 .rank-pages button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .rank-pages button:disabled{opacity:.5}
