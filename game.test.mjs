@@ -55,7 +55,9 @@ test('grades once, expires, and shares the top 200 across database connections',
       '약을 하다', '약을하다', '약 을 하 다', '약을한냥이', '약물중독', '약에취함', '뽕맞은고양이',
       '도박', '도1박', '도박왕', '노름', '카지노', '바카라', '홀덤', '블랙잭', '룰렛', '슬롯머신',
       '스포츠토토', '토토', '토토왕', '토토사이트', '돈내기', '잭팟', '로또', '복권', '불법배팅', '베팅왕',
-      'CASINO', 'c4s1no', 'gambling', 'poker', 'betting', 'ondrugs', 'stoned', 'drugdealer']) {
+      'CASINO', 'c4s1no', 'gambling', 'poker', 'betting', 'ondrugs', 'stoned', 'drugdealer', '커플', '커플고양이', '커1플', '커 플',
+      '헤어져라', '헤 어 져 라', '헤어1져라', '헤어져버려', '헤어지세요', '헤어지자', 'couple', 'breakup',
+      '쮸쮸', '쮸 쮸', '쮸1쮸', '빼빼로', '빼 빼 로', '빼1빼로']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.equal((await rejected.json()).error, '사용할 수 없는 표현이 포함되어 있습니다.', nickname);
@@ -65,7 +67,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '약속친구', '대마법사', '대마왕', '단호박죽', '눈물의승리', '절망을이겨낸', 'AmethystCat', 'SeaweedCat',
       'TweedCat', 'PotatoCat', 'Cracker', '소주제달인', '우리친구', '친절냥이', '장애인친구', '변신고양이', '대변인',
       '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
-      '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat']) {
+      '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -132,7 +134,8 @@ test('grades once, expires, and shares the top 200 across database connections',
     );
     const moderatedNames = ['인생 나락간', '니얼굴', '느금마', '술꾼', '담배', '자살', '마약', 'lifesucks', '뿌지직', '똥고양이', '응가대장', '남자친구', '여친',
       '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
-      '도박왕', '카지노', '스포츠토토', 'gambling'];
+      '도박왕', '카지노', '스포츠토토', 'gambling', '커플', '커플헤어져라', '헤어져라',
+      '쮸쮸', '빼빼로'];
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
