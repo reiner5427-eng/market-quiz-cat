@@ -65,10 +65,12 @@
 </div>
 <section class="rank card" aria-labelledby="rank-title">
 <div class="rankhead"><div><p class="eyebrow">모두의 간식 기록</p><h2 id="rank-title">🏆 명예의 전당</h2></div><button id="refresh">새로고침</button></div>
-<p class="intro">별명마다 최고 점수만 표시해요. 상위 100위를 50명씩 표시해요. 동점이면 먼저 시작한 기록이 앞서요.</p>
+<p class="intro">별명마다 최고 점수만 표시해요. 상위 200위를 50명씩 표시해요. 동점이면 먼저 시작한 기록이 앞서요.</p>
 <nav class="rank-pages" aria-label="명예의 전당 페이지">
 <button id="rank-page-1" type="button" aria-label="1페이지, 1위부터 50위" aria-controls="board" aria-current="page">1페이지</button>
 <button id="rank-page-2" type="button" aria-label="2페이지, 51위부터 100위" aria-controls="board" disabled>2페이지</button>
+<button id="rank-page-3" type="button" aria-label="3페이지, 101위부터 150위" aria-controls="board" disabled>3페이지</button>
+<button id="rank-page-4" type="button" aria-label="4페이지, 151위부터 200위" aria-controls="board" disabled>4페이지</button>
 </nav>
 <p id="rank-status" role="status"></p>
 <table id="board" hidden><thead><tr><th scope="col">순위</th><th scope="col">별명</th><th scope="col">고양이</th><th scope="col">점수</th><th scope="col">체중</th></tr></thead><tbody></tbody></table>
