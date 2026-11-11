@@ -23,29 +23,58 @@ const weight = score => (3 + score * .025).toFixed(2);
 const mistakesFor = game => game.mistakes ?? game.step - game.score / ANSWER_POINTS;
 const livesLeft = mistakes => Math.max(0, MAX_LIVES - mistakes);
 
-const blockedKorean = /씨발|시발|쉬발|쒸발|씹발|씨팔|시팔|쉬팔|씨바|씨빠|씨벙|시벌|씨벌|쌍놈|쌍년|미친놈|미친년|미친새끼|개새끼|개시키|개색끼|개세끼|새끼야|병신|븅신|빙신|뱅신|븅쉰|등신|또라이|좆|좃|좇|죶|존나|졸라|조낸|존내|지랄|쥐랄|엿먹|꺼져|개같|개년|썅|씨댕|섹스|섹쓰|섹수|쎅스|쌕스|섹1스|야동|야설|음란|포르노|포르나|보짓|보지년|자지년|자위|정액|사정남|딸딸이|성기노출|따먹|기모띠|기모띄|기모티|기모찌|기무띠|키모띠|키모치|앙기모|일베|일간베스트|일베충|일베저장소|운지|노무노무|노무쿤|느그홍어|홍어새끼|홍어충|틀딱|김치녀|맘충|한남충|한녀충/;
+const blockedKorean = /씨발|시발|쉬발|쒸발|씹발|씨팔|시팔|쉬팔|씨바|씨빠|씨벙|시벌|씨벌|쌍놈|쌍년|미친놈|미친년|미친새끼|개새끼|개시키|개색끼|개세끼|새끼야|병신|븅신|빙신|뱅신|븅쉰|등신|또라이|좆|좃|좇|죶|존나|졸라|조낸|존내|지랄|쥐랄|엿먹|꺼져|개같|개년|썅|씨댕|섹스|섹쓰|섹수|쎅스|쌕스|섹1스|야동|야설|음란|포르노|포르나|보짓|보지년|자지년|자위|정액|사정남|딸딸이|성기노출|따먹|기모띠|기모띄|기모티|기모찌|기무띠|키모띠|키모치|앙기모|일베|일간베스트|일베충|일베저장소|운지|노무노무|노무쿤|느그홍어|홍어새끼|홍어충|틀딱|김치녀|맘충|한남충|한녀충|니얼굴|네얼굴|니면상|느금마|느금|느앰|느엠|니애미|니에미|니앰|네애미|니애비|느그엄마|느그애미|느그아빠|느그애비|느그부모|너네엄마|너네애미|니엄마|패드립/;
 const blockedInitials = /ᄉᄇ|ᄊᄇ|ᄉᄑ|ᄇᄉ|ᄌᄅ|ᄌᄂ|ᄀᄉᄁ|ᄉᄉᄉ|ᄋᄇᄎ/;
 const blockedKoreanWord = /^(?:보지|자지|야짤|느금마|애미|애비|급식충|노알라|노짱|슨상님|이기야|응디|게이야|홍어|슨상|똥꼬)(?:[0-9]*)$/;
 const blockedEnglish = /f+u+c+k+|fuk|fvck|fck|phuck|fucken|muthaf|sh+i+t+|shyt|b+i+t+c+h+|biatch|bastard|asshole|dickhead|dickpic|dickface|dipshit|bullshit|motherf|slut|whore|pussy|porn|hentai|blowjob|handjob|dildo|orgasm|gangbang|cocksuck|sextoy|sexchat|sexy|damn|nigg[ae]|nigg[ae]r|fag+ot|retard|ilbe|gimotti|kimotti|kimochi|ssibal|sibal|shibal|jiral|byungsin/;
 const blockedEnglishWord = /^(?:ass|arse|cock|dick|damn|hell|cunt|fag|sex|sexx|sexy|xxx|cum|cumming|nude|nudes|rape|rapist|wtf|stfu|fml|suck|sucks|crap)$/;
 const leet = { 0: 'o', 1: 'i', 2: 'z', 3: 'e', 4: 'a', 5: 's', 6: 'g', 7: 't', 8: 'b', 9: 'g', '@': 'a', '$': 's', '!': 'i', '+': 't' };
 
-function isBlockedNickname(nickname) {
+const blockedNegativeKorean = /자살|자해|자해러|죽고싶|죽을래|죽어버|죽어라|살기싫|살고싶지않|사라지고싶|인생나락|나락간|나락행|망한인생|인생망|인생끝|인생포기|인생실패|인간쓰레기|쓰레기인생|인생쓰레기|쓸모없|가치없|태어나지말|태어난게죄|패배자인생|도태인생|무능한나/;
+const blockedNegativeEnglish = /suicid|selfharm|killmyself|wanttodie|wannadie|betteroffdead|hatemylife|lifesucks|mylifeisover|worthless|hopeless|bornloser/;
+const blockedSubstancesKorean = /술꾼|술쟁|술마시|술먹|술취|술좋|술사랑|술한잔|술잔|술집|술병|술안주|술파티|술중독|음주|숙취|소주(?!제)|맥주|막걸리|위스키|보드카|데킬라|테킬라|샴페인|고량주|칵테일|담배|흡연|꼴초|니코틴|스누스|마약|약쟁|약빨|뽕쟁|필로폰|히로뽕|코카인|헤로인|펜타닐|엑스터시|대마초|대마흡|케타민|엘에스디|해시시/;
+const blockedSubstancesKoreanWord = /^(?:술|양주|와인|사케|시가|대마)(?:[0-9]*)$/;
+const blockedSubstancesEnglish = /cigarette|tobacco|nicotine|marijuana|cannabis|cocaine|heroin|fentanyl|methamphetamine|ecstasy|ketamine|whiskey|whisky|vodka|tequila|makgeolli|soju|vaping|vape|gethigh/;
+const blockedSubstancesEnglishWord = /^(?:alcohol|beer|wine|drunk|tipsy|sake|meth|weed|pot|crack|coke|drug|drugs|lsd|cigar|smoke|smoking)$/;
+
+function nicknameWarning(nickname) {
   const normalized = nickname.normalize('NFKC').toLowerCase().replace(/[\p{M}\p{Cf}]/gu, '');
   const korean = normalized.replace(/[^가-힣\u1100-\u11ff]/g, '').normalize('NFKC');
-  if (blockedKorean.test(korean) || blockedKoreanWord.test(korean) || blockedInitials.test(korean)) return true;
-  if (normalized.split(/[\s_]+/).some(word => blockedKoreanWord.test(word))) return true;
+  const tokens = normalized.split(/[\s_]+/);
+  if (blockedKorean.test(korean) || blockedKoreanWord.test(korean) || blockedInitials.test(korean) ||
+      tokens.some(word => blockedKoreanWord.test(word))) {
+    return '비속어는 사용할 수 없습니다.';
+  }
 
   const english = normalized.replace(/[0-9@$!+]/g, character => leet[character]);
   const words = english.split(/[^a-z]+/);
   const compact = words.join('');
-  return blockedEnglish.test(compact) || blockedEnglishWord.test(compact) ||
-    words.some(word => blockedEnglishWord.test(word)) ||
-    blockedEnglishWord.test(normalized.replace(/[^a-z]/g, ''));
+  if (blockedEnglish.test(compact) || blockedEnglishWord.test(compact) ||
+      words.some(word => blockedEnglishWord.test(word)) ||
+      blockedEnglishWord.test(normalized.replace(/[^a-z]/g, ''))) {
+    return '비속어는 사용할 수 없습니다.';
+  }
+  if (blockedNegativeKorean.test(korean) || blockedNegativeEnglish.test(compact) ||
+      blockedSubstancesKorean.test(korean) || blockedSubstancesKoreanWord.test(korean) ||
+      tokens.some(word => blockedSubstancesKoreanWord.test(word)) ||
+      blockedSubstancesEnglish.test(compact) || blockedSubstancesEnglishWord.test(compact) ||
+      words.some(word => blockedSubstancesEnglishWord.test(word))) {
+    return '사용할 수 없는 표현이 포함되어 있습니다.';
+  }
+  return '';
 }
 
 async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
+    const { results: names } = await db.prepare(
+      'SELECT DISTINCT nickname FROM games WHERE ranking_eligible = ? AND finished = 1 AND score > 0'
+    ).bind(RANKING_GENERATION).all();
+    for (const { nickname } of names) {
+      if (nicknameWarning(nickname)) {
+        await db.prepare('DELETE FROM games WHERE nickname = ? AND ranking_eligible = ? AND finished = 1')
+          .bind(nickname, RANKING_GENERATION).run();
+      }
+    }
     const { results } = await db.prepare(
       `WITH best AS (
         SELECT nickname, score, COALESCE(cat_coat, coat) AS coat, started, id,
@@ -55,7 +84,7 @@ async function api(request, db, route) {
       )
       SELECT nickname, score, coat FROM best
       WHERE attempt = 1
-      ORDER BY score DESC, started, id LIMIT 100`
+      ORDER BY score DESC, started, id LIMIT 200`
     ).bind(RANKING_GENERATION).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
@@ -73,9 +102,8 @@ async function api(request, db, route) {
   }
   if (route === '/api/start') {
     const entered = typeof body.nickname === 'string' ? body.nickname : '';
-    if (isBlockedNickname(entered)) {
-      return json({ error: '비속어는 사용할 수 없습니다.' }, 400);
-    }
+    const warning = nicknameWarning(entered);
+    if (warning) return json({ error: warning }, 400);
     const nickname = entered.normalize('NFKC').trim();
     if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
       return json({ error: '한글 또는 영문이 포함된 2~12자 별명을 입력해 주세요.' }, 400);
