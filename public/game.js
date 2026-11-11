@@ -224,9 +224,9 @@ function showRankingCat(cell, coat, points) {
 let rankingRows = [];
 let rankingPage = 1;
 const RANKING_PAGE_SIZE = 50;
-const rankingPageButtons = [$('rank-page-1'), $('rank-page-2')];
+const rankingPageButtons = [1, 2, 3, 4].map(page => $('rank-page-' + page));
 function renderRanking() {
-  if (rankingRows.length <= RANKING_PAGE_SIZE) rankingPage = 1;
+  rankingPage = Math.min(rankingPage, Math.max(1, Math.ceil(rankingRows.length / RANKING_PAGE_SIZE)));
   const offset = (rankingPage - 1) * RANKING_PAGE_SIZE;
   const rows = rankingRows.slice(offset, offset + RANKING_PAGE_SIZE);
   $('board').tBodies[0].replaceChildren(...rows.map(row => {
@@ -239,10 +239,10 @@ function renderRanking() {
     return tr;
   }));
   for (const [i, button] of rankingPageButtons.entries()) {
+    button.disabled = i > 0 && i * RANKING_PAGE_SIZE >= rankingRows.length;
     if (rankingPage === i + 1) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   }
-  rankingPageButtons[1].disabled = rankingRows.length <= RANKING_PAGE_SIZE;
   $('board').hidden = !rows.length;
   $('rank-status').textContent = rows.length
     ? rows[0].rank + '~' + rows[rows.length - 1].rank + '위 · 전체 ' + rankingRows.length + '명'
