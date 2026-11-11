@@ -88,6 +88,15 @@ function nicknameWarning(nickname) {
   return '';
 }
 
+const koreanPersonalName = /^(?:[김이박최정강조윤장임한오서신권황안송전홍유고문양손배백허남심노하곽성차주우구민진지엄채원천방공현함변염여추도소석선설마길연][가-힣]{1,3}|(?:남궁|독고|황보|제갈|선우|사공|서문|동방)[가-힣]{1,2})$/;
+const nicknameNouns = new Set(['고양이', '강아지', '치즈', '판다', '토끼', '겨울', '하늘', '하늘이', '구름',
+  '친구', '냥이', '다람쥐', '간식', '대장', '별빛', '우유', '초코', '고등어', '흰둥이', '회색', '턱시도',
+  '김밥', '이불', '유자차']);
+function hasMultiplePersonalNames(nickname) {
+  const parts = nickname.split(/[\s,_/·&+|;:-]+/).filter(Boolean).map(part => part.replace(/[0-9]/g, ''));
+  return parts.length >= 2 && parts.every(part => !nicknameNouns.has(part) && koreanPersonalName.test(part));
+}
+
 async function api(request, db, route) {
   if (route === '/api/ranking' && request.method === 'GET') {
     const { results: names } = await db.prepare(
@@ -129,6 +138,9 @@ async function api(request, db, route) {
     const warning = nicknameWarning(entered);
     if (warning) return json({ error: warning }, 400);
     const nickname = entered.normalize('NFKC').trim();
+    if (hasMultiplePersonalNames(nickname)) {
+      return json({ error: '이름은 한 개만 입력해 주세요.' }, 400);
+    }
     if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
       return json({ error: '한글 또는 영문이 포함된 2~12자 별명을 입력해 주세요.' }, 400);
     }
