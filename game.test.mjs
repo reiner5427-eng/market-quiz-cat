@@ -36,14 +36,16 @@ test('grades once, expires, and shares the top 200 across database connections',
     assert.deepEqual(await data('/api/ranking'), []);
     db.prepare("DELETE FROM games WHERE id IN ('old', 'previous')").run();
     assert.equal((await client('/')).status, 200);
-    assert.equal((await client('/api/start', { nickname: '01234567890' })).status, 400);
+    const badFormat = await client('/api/start', { nickname: '01234567890' });
+    assert.equal(badFormat.status, 400);
+    assert.equal((await badFormat.json()).code, undefined);
     for (const nickname of ['씨발고양이', '시1발', 'ㅅ_ㅂ', '일 베', '일1베', '앙기모띠', '기 모 띠',
       '기모찌', '야_동', '섹 1 스', 'FUCK', 'ＦＵＣＫ', 'f_u_c_k', 'fvck', 'sh1t',
       'b1tch', 's3x', 'p0rn', 'DICKHEAD', '씨\u200b발', '니얼굴', '니 얼 굴', '느금마', '느앰',
       '니애미', '니1애미', '느그엄마', '니면상']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
-      assert.equal((await rejected.json()).error, '비속어는 사용할 수 없습니다.');
+      assert.deepEqual(await rejected.json(), { error: '비속어는 사용할 수 없습니다.', code: 'nickname_warning' });
     }
     for (const nickname of ['인생 나락간', '인생_나락간', '인1생나락간', '망한인생', '자살', '자1살', '자_해',
       '죽고싶다', '살기싫어', '쓸모없는나', 'SU1CIDE', 'self_harm', 'lifesucks', '소주한잔', '소 주', '술꾼',
@@ -64,7 +66,8 @@ test('grades once, expires, and shares the top 200 across database connections',
       'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
-      assert.equal((await rejected.json()).error, '사용할 수 없는 표현이 포함되어 있습니다.', nickname);
+      assert.deepEqual(await rejected.json(),
+        { error: '사용할 수 없는 표현이 포함되어 있습니다.', code: 'nickname_warning' }, nickname);
     }
     for (const nickname of ['문채은 양신우', '문채은_양신우', '문채은,양신우', '문채은/양신우',
       '문채은·양신우', '문채은&양신우', '홍길동 김철수', '남궁민 독고영재', '김준 이솔', '김1민수 이2서연']) {
