@@ -146,7 +146,7 @@ async function api(request, db, route) {
   if (route === '/api/start') {
     const entered = typeof body.nickname === 'string' ? body.nickname : '';
     const warning = nicknameWarning(entered);
-    if (warning) return json({ error: warning }, 400);
+    if (warning) return json({ error: warning, code: 'nickname_warning' }, 400);
     const nickname = entered.normalize('NFKC').trim();
     if (hasMultiplePersonalNames(nickname)) {
       return json({ error: '이름은 한 개만 입력해 주세요.' }, 400);
