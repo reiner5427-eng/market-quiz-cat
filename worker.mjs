@@ -50,7 +50,8 @@ const blockedGamblingKoreanWord = /^(?:토토|베팅|배팅)(?:[0-9]*)$/;
 const blockedGamblingEnglish = /casino|gambl|baccarat|blackjack|roulette|sportsbook|bookmaker|jackpot|slotmachine|sportsbet|betting|lottery|lotto/;
 const blockedGamblingEnglishWord = /^(?:bet|bets|poker|slot|slots)$/;
 
-const blockedCustomKorean = /쮸쮸|빼빼로|보숭|보들|앙앙/;
+const blockedCustomKorean = /쮸쮸|빼빼로|보숭|보들|앙앙|꼬치|바보/;
+const blockedCustomEnglish = /ebola/;
 const blockedCustomEnglishWord = /^ate$/;
 
 const blockedPoliticalKorean = /히틀러|히틀라|괴벨스|고벨스|괴벨즈|시진핑|이재명|노무현|스탈린|스딸린|김정은|무솔리니|무쏠리니|네오나치|독일나치|나치(?:당|독일|정권|즘|주의|군|만세|충|냥이|고양이)|(?:위대한|최고|친애하는)[령영]도자|[령영]도자(?:동지|님|만세|냥이|고양이)/;
@@ -89,7 +90,7 @@ function nicknameWarning(nickname) {
       tokens.some(word => blockedGamblingKoreanWord.test(word)) ||
       blockedGamblingEnglish.test(compact) || blockedGamblingEnglishWord.test(compact) ||
       words.some(word => blockedGamblingEnglishWord.test(word)) || blockedCustomKorean.test(korean) ||
-      blockedCustomEnglishWord.test(compact) || blockedCustomEnglishWord.test(plainEnglish) ||
+      blockedCustomEnglish.test(compact) || blockedCustomEnglishWord.test(compact) || blockedCustomEnglishWord.test(plainEnglish) ||
       words.some(word => blockedCustomEnglishWord.test(word)) ||
       blockedPoliticalKorean.test(korean) || blockedPoliticalKoreanWord.test(korean) ||
       tokens.some(word => blockedPoliticalKoreanWord.test(word)) || blockedPoliticalEnglish.test(compact)) {
