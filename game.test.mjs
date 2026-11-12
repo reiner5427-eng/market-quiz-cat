@@ -65,6 +65,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       'h1tler', 'goebbels', 'xijinping', 'leejaemyung', 'rohmuhyun', 'stalin', 'kimjongun', 'mussolini',
       'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이', '보숭', '보들', '앙앙', '보 숭', '보_들', '앙1앙',
       '꼬치', '꼬 치', '꼬1치', '바보', '바 보', '바1보', 'ebola', 'EBOLA', 'e_b_o_l_a', 'eb0la', '싫어', '싫다', '미워', '너싫어', '싫 어', '싫1다', '미_워', '미워해', '싫음', '밉다',
+      '지렁이', '아이큐', '집', '가다', '가고', '싶다', '엄마', '사랑해', '제발', '자유시간',
       '못생기', '못생기다', '못생긴냥이', '못 생겼어', '못1생겨', '추하다', '추하 네', '추한고양이', '추해']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
@@ -154,6 +155,8 @@ test('grades once, expires, and shares the top 200 across database connections',
       '도박왕', '카지노', '스포츠토토', 'gambling', '커플', '커플헤어져라', '헤어져라',
       '쮸쮸', '빼빼로', '나치', '히틀러', '괴벨스', '시진핑', '이재명', '노무현', '스탈린',
       '김정은', '령도자', '영도자', '무솔리니', 'ate', '보숭', '보들냥이', '앙앙', '싫어', '미워해', '못생기다', '추하다', '꼬치', '바보냥이', 'EBOLA'];
+    moderatedNames.push('지렁이냥', '아이 큐왕', '고양이집', '냥이가다', '가고싶어', '자고싶다',
+      '냥이엄마', '고양이사랑해', '제발냥이', '자유 시간냥이');
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);

@@ -50,7 +50,7 @@ const blockedGamblingKoreanWord = /^(?:토토|베팅|배팅)(?:[0-9]*)$/;
 const blockedGamblingEnglish = /casino|gambl|baccarat|blackjack|roulette|sportsbook|bookmaker|jackpot|slotmachine|sportsbet|betting|lottery|lotto/;
 const blockedGamblingEnglishWord = /^(?:bet|bets|poker|slot|slots)$/;
 
-const blockedCustomKorean = /쮸쮸|빼빼로|보숭|보들|앙앙|꼬치|바보/;
+const blockedCustomKorean = /쮸쮸|빼빼로|보숭|보들|앙앙|꼬치|바보|지렁이|아이큐|집|가다|가고|싶다|엄마|사랑해|제발|자유시간/;
 const blockedCustomEnglish = /ebola/;
 const blockedCustomEnglishWord = /^ate$/;
 
