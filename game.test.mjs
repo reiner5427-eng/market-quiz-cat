@@ -57,7 +57,11 @@ test('grades once, expires, and shares the top 200 across database connections',
       '스포츠토토', '토토', '토토왕', '토토사이트', '돈내기', '잭팟', '로또', '복권', '불법배팅', '베팅왕',
       'CASINO', 'c4s1no', 'gambling', 'poker', 'betting', 'ondrugs', 'stoned', 'drugdealer', '커플', '커플고양이', '커1플', '커 플',
       '헤어져라', '헤 어 져 라', '헤어1져라', '헤어져버려', '헤어지세요', '헤어지자', 'couple', 'breakup',
-      '쮸쮸', '쮸 쮸', '쮸1쮸', '빼빼로', '빼 빼 로', '빼1빼로']) {
+      '쮸쮸', '쮸 쮸', '쮸1쮸', '빼빼로', '빼 빼 로', '빼1빼로', '나치', '나 치', '나1치', '나치독일', '네오나치', '히틀러',
+      '히 틀 러', '괴벨스', '고벨스', '시진핑', '이재명', '노무현', '노_무_현', '스탈린', '스 탈 린',
+      '김정은', '김1정은', '김_정_은', '령도자', '영도자', '위대한령도자', '영도자동지', '무솔리니',
+      'h1tler', 'goebbels', 'xijinping', 'leejaemyung', 'rohmuhyun', 'stalin', 'kimjongun', 'mussolini',
+      'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.equal((await rejected.json()).error, '사용할 수 없는 표현이 포함되어 있습니다.', nickname);
@@ -74,7 +78,8 @@ test('grades once, expires, and shares the top 200 across database connections',
       'TweedCat', 'PotatoCat', 'Cracker', '소주제달인', '우리친구', '친절냥이', '장애인친구', '변신고양이', '대변인',
       '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
       '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이', '문채은', '김준', '치즈 고양이', '강아지 고양이',
-      '하늘 구름', '김밥 이불', '김밥 먹는냥이', '유자차 이불']) {
+      '하늘 구름', '김밥 이불', '김밥 먹는냥이', '유자차 이불', '피보나치', '지나치게귀여운', '부산영도', '영도자전거',
+      '고령도자기', '정은고양이', 'Chocolate', 'PirateCat']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -142,7 +147,8 @@ test('grades once, expires, and shares the top 200 across database connections',
     const moderatedNames = ['인생 나락간', '니얼굴', '느금마', '술꾼', '담배', '자살', '마약', 'lifesucks', '뿌지직', '똥고양이', '응가대장', '남자친구', '여친',
       '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
       '도박왕', '카지노', '스포츠토토', 'gambling', '커플', '커플헤어져라', '헤어져라',
-      '쮸쮸', '빼빼로'];
+      '쮸쮸', '빼빼로', '나치', '히틀러', '괴벨스', '시진핑', '이재명', '노무현', '스탈린',
+      '김정은', '령도자', '영도자', '무솔리니', 'ate'];
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
