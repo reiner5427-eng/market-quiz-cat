@@ -1,34 +1,13 @@
 const $ = id => document.getElementById(id);
 const topics = { A: '시장경제와 가계·기업', B: '경제성장과 우리 생활', C: '세계 속의 무역' };
 let game, deadline, timer, step, current, upcoming, busy, ending, review;
-const NICKNAME_WARNING_KEY = 'quiz.nicknameWarnings';
-const WARNING_URL = 'http://warning.or.kr/';
-let nicknameWarnings = 0;
-try {
-  nicknameWarnings = sessionStorage.getItem(NICKNAME_WARNING_KEY) === '1' ? 1 : 0;
-} catch {
-  // Keep the warning count in memory when browser storage is unavailable.
-}
-
-function setNicknameWarnings(count) {
-  nicknameWarnings = count;
-  try {
-    sessionStorage.setItem(NICKNAME_WARNING_KEY, String(count));
-  } catch {
-    // The in-memory count is still available for this page.
-  }
-}
 
 async function api(route, body) {
   const response = await fetch('/api/' + route, body ? {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
   } : {});
   const data = await response.json();
-  if (!response.ok) {
-    const error = new Error(data.error);
-    error.code = data.code;
-    throw error;
-  }
+  if (!response.ok) throw Error(data.error);
   return data;
 }
 function showMessage(message = '') {
@@ -107,7 +86,6 @@ $('start').addEventListener('submit', async event => {
   event.preventDefault();
   const button = event.submitter;
   if (button.disabled) return;
-  let redirecting = false;
   button.disabled = true;
   catPicker.disabled = true;
   showMessage();
@@ -126,28 +104,10 @@ $('start').addEventListener('submit', async event => {
     timer = setInterval(tick, 200);
     tick();
   } catch (error) {
-    if (error.code === 'nickname_warning') {
-      const count = nicknameWarnings + 1;
-      redirecting = count === 2;
-      setNicknameWarnings(redirecting ? 0 : count);
-      const notice = $('nickname-notice').textContent;
-      const next = redirecting ? ' Warning.or.kr로 이동합니다.' : '';
-      showMessage(error.message + ' ' + notice + ' (경고 ' + count + '/2회)' + next);
-      if (redirecting) {
-        window.setTimeout(() => {
-          button.disabled = false;
-          catPicker.disabled = false;
-          window.location.assign(WARNING_URL);
-        }, 1000);
-      }
-    } else {
-      showMessage(error.message);
-    }
+    showMessage(error.message);
   } finally {
-    if (!redirecting) {
-      button.disabled = false;
-      catPicker.disabled = false;
-    }
+    button.disabled = false;
+    catPicker.disabled = false;
   }
 });
 async function answer(choice) {
