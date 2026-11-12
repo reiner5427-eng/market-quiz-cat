@@ -50,7 +50,7 @@ const blockedGamblingKoreanWord = /^(?:토토|베팅|배팅)(?:[0-9]*)$/;
 const blockedGamblingEnglish = /casino|gambl|baccarat|blackjack|roulette|sportsbook|bookmaker|jackpot|slotmachine|sportsbet|betting|lottery|lotto/;
 const blockedGamblingEnglishWord = /^(?:bet|bets|poker|slot|slots)$/;
 
-const blockedCustomKorean = /쮸쮸|빼빼로/;
+const blockedCustomKorean = /쮸쮸|빼빼로|보숭|보들|앙앙/;
 const blockedCustomEnglishWord = /^ate$/;
 
 const blockedPoliticalKorean = /히틀러|히틀라|괴벨스|고벨스|괴벨즈|시진핑|이재명|노무현|스탈린|스딸린|김정은|무솔리니|무쏠리니|네오나치|독일나치|나치(?:당|독일|정권|즘|주의|군|만세|충|냥이|고양이)|(?:위대한|최고|친애하는)[령영]도자|[령영]도자(?:동지|님|만세|냥이|고양이)/;
@@ -146,7 +146,7 @@ async function api(request, db, route) {
   if (route === '/api/start') {
     const entered = typeof body.nickname === 'string' ? body.nickname : '';
     const warning = nicknameWarning(entered);
-    if (warning) return json({ error: warning, code: 'nickname_warning' }, 400);
+    if (warning) return json({ error: warning }, 400);
     const nickname = entered.normalize('NFKC').trim();
     if (hasMultiplePersonalNames(nickname)) {
       return json({ error: '이름은 한 개만 입력해 주세요.' }, 400);
