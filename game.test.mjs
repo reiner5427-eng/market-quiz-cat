@@ -45,7 +45,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '니애미', '니1애미', '느그엄마', '니면상']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
-      assert.deepEqual(await rejected.json(), { error: '비속어는 사용할 수 없습니다.', code: 'nickname_warning' });
+      assert.deepEqual(await rejected.json(), { error: '비속어는 사용할 수 없습니다.' });
     }
     for (const nickname of ['인생 나락간', '인생_나락간', '인1생나락간', '망한인생', '자살', '자1살', '자_해',
       '죽고싶다', '살기싫어', '쓸모없는나', 'SU1CIDE', 'self_harm', 'lifesucks', '소주한잔', '소 주', '술꾼',
@@ -63,11 +63,11 @@ test('grades once, expires, and shares the top 200 across database connections',
       '히 틀 러', '괴벨스', '고벨스', '시진핑', '이재명', '노무현', '노_무_현', '스탈린', '스 탈 린',
       '김정은', '김1정은', '김_정_은', '령도자', '영도자', '위대한령도자', '영도자동지', '무솔리니',
       'h1tler', 'goebbels', 'xijinping', 'leejaemyung', 'rohmuhyun', 'stalin', 'kimjongun', 'mussolini',
-      'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이']) {
+      'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이', '보숭', '보들', '앙앙', '보 숭', '보_들', '앙1앙']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.deepEqual(await rejected.json(),
-        { error: '사용할 수 없는 표현이 포함되어 있습니다.', code: 'nickname_warning' }, nickname);
+        { error: '사용할 수 없는 표현이 포함되어 있습니다.' }, nickname);
     }
     for (const nickname of ['문채은 양신우', '문채은_양신우', '문채은,양신우', '문채은/양신우',
       '문채은·양신우', '문채은&양신우', '홍길동 김철수', '남궁민 독고영재', '김준 이솔', '김1민수 이2서연']) {
@@ -151,7 +151,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
       '도박왕', '카지노', '스포츠토토', 'gambling', '커플', '커플헤어져라', '헤어져라',
       '쮸쮸', '빼빼로', '나치', '히틀러', '괴벨스', '시진핑', '이재명', '노무현', '스탈린',
-      '김정은', '령도자', '영도자', '무솔리니', 'ate'];
+      '김정은', '령도자', '영도자', '무솔리니', 'ate', '보숭', '보들냥이', '앙앙'];
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
