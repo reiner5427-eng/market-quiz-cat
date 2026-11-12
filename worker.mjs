@@ -51,6 +51,11 @@ const blockedGamblingEnglish = /casino|gambl|baccarat|blackjack|roulette|sportsb
 const blockedGamblingEnglishWord = /^(?:bet|bets|poker|slot|slots)$/;
 
 const blockedCustomKorean = /쮸쮸|빼빼로/;
+const blockedCustomEnglishWord = /^ate$/;
+
+const blockedPoliticalKorean = /히틀러|히틀라|괴벨스|고벨스|괴벨즈|시진핑|이재명|노무현|스탈린|스딸린|김정은|무솔리니|무쏠리니|네오나치|독일나치|나치(?:당|독일|정권|즘|주의|군|만세|충|냥이|고양이)|(?:위대한|최고|친애하는)[령영]도자|[령영]도자(?:동지|님|만세|냥이|고양이)/;
+const blockedPoliticalKoreanWord = /^(?:나[치찌]|[령영]도자)(?:[0-9]*)$/;
+const blockedPoliticalEnglish = /nazi|hitt?ler|goebbels|gobbels|xijinping|leejaem(?:yung|yeong)|rohm(?:oo|u)hyun|stalin|(?:kimjong|gimjeong)(?:un|eun)|mussolini/;
 
 function nicknameWarning(nickname) {
   const normalized = nickname.normalize('NFKC').toLowerCase().replace(/[\p{M}\p{Cf}]/gu, '');
@@ -64,9 +69,10 @@ function nicknameWarning(nickname) {
   const english = normalized.replace(/[0-9@$!+]/g, character => leet[character]);
   const words = english.split(/[^a-z]+/);
   const compact = words.join('');
+  const plainEnglish = normalized.replace(/[^a-z]/g, '');
   if (blockedEnglish.test(compact) || blockedEnglishWord.test(compact) ||
       words.some(word => blockedEnglishWord.test(word)) ||
-      blockedEnglishWord.test(normalized.replace(/[^a-z]/g, ''))) {
+      blockedEnglishWord.test(plainEnglish)) {
     return '비속어는 사용할 수 없습니다.';
   }
   if (blockedNegativeKorean.test(korean) || blockedNegativeEnglish.test(compact) ||
@@ -82,7 +88,11 @@ function nicknameWarning(nickname) {
       blockedGamblingKorean.test(korean) || blockedGamblingKoreanWord.test(korean) ||
       tokens.some(word => blockedGamblingKoreanWord.test(word)) ||
       blockedGamblingEnglish.test(compact) || blockedGamblingEnglishWord.test(compact) ||
-      words.some(word => blockedGamblingEnglishWord.test(word)) || blockedCustomKorean.test(korean)) {
+      words.some(word => blockedGamblingEnglishWord.test(word)) || blockedCustomKorean.test(korean) ||
+      blockedCustomEnglishWord.test(compact) || blockedCustomEnglishWord.test(plainEnglish) ||
+      words.some(word => blockedCustomEnglishWord.test(word)) ||
+      blockedPoliticalKorean.test(korean) || blockedPoliticalKoreanWord.test(korean) ||
+      tokens.some(word => blockedPoliticalKoreanWord.test(word)) || blockedPoliticalEnglish.test(compact)) {
     return '사용할 수 없는 표현이 포함되어 있습니다.';
   }
   return '';
