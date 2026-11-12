@@ -27,6 +27,7 @@ button:hover:enabled{background:#ffe8cc}button:disabled{cursor:default}button:fo
 #review{max-height:300px;overflow:auto}details{border-bottom:1px solid var(--border);padding:8px 0}summary{cursor:pointer;font-weight:700}
 .rank{margin-top:18px}.rankhead h2{margin:0}.rankhead button{flex-shrink:0}table{border-collapse:collapse;width:100%;text-align:left;font-variant-numeric:tabular-nums}td,th{padding:9px 5px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}th{color:var(--muted)}
 footer{text-align:center;font-size:.83rem;color:var(--muted);margin:20px 0}
+#nickname-notice{margin:8px 0 0;color:#8b2436;font-weight:700}
 @media(max-width:660px){main{padding:14px 12px}.layout{grid-template-columns:1fr;gap:12px}.cat{display:grid;grid-template-columns:100px 1fr;align-items:center;text-align:left;gap:3px 12px;padding:14px;grid-row:1}.cat .stage{grid-row:1/5;grid-column:1;min-height:70px}.cat h2,#cat-says{margin:0}.cat .eyebrow{display:none}.stats{text-align:center}.stats div{padding:3px}.rank{margin-top:12px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 #cat{width:min(100%,290px);display:block;overflow:visible}.belly{transform-box:fill-box;transform-origin:center bottom;transform:scale(var(--growth,1),calc(.48 + .52 * var(--growth,1)));transition:transform .45s cubic-bezier(.2,.75,.35,1.2)} @media(prefers-reduced-motion:reduce){.belly{transition:none}}
