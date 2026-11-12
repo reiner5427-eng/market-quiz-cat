@@ -63,7 +63,9 @@ test('grades once, expires, and shares the top 200 across database connections',
       '히 틀 러', '괴벨스', '고벨스', '시진핑', '이재명', '노무현', '노_무_현', '스탈린', '스 탈 린',
       '김정은', '김1정은', '김_정_은', '령도자', '영도자', '위대한령도자', '영도자동지', '무솔리니',
       'h1tler', 'goebbels', 'xijinping', 'leejaemyung', 'rohmuhyun', 'stalin', 'kimjongun', 'mussolini',
-      'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이', '보숭', '보들', '앙앙', '보 숭', '보_들', '앙1앙']) {
+      'ate', 'ATE', 'a_t_e', '4t3', 'ate42', 'ate 냥이', '보숭', '보들', '앙앙', '보 숭', '보_들', '앙1앙',
+      '싫어', '싫다', '미워', '너싫어', '싫 어', '싫1다', '미_워', '미워해', '싫음', '밉다',
+      '못생기', '못생기다', '못생긴냥이', '못 생겼어', '못1생겨', '추하다', '추하 네', '추한고양이', '추해']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.deepEqual(await rejected.json(),
@@ -82,7 +84,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
       '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이', '문채은', '김준', '치즈 고양이', '강아지 고양이',
       '하늘 구름', '김밥 이불', '김밥 먹는냥이', '유자차 이불', '피보나치', '지나치게귀여운', '부산영도', '영도자전거',
-      '고령도자기', '정은고양이', 'Chocolate', 'PirateCat']) {
+      '고령도자기', '정은고양이', 'Chocolate', 'PirateCat', '실타래', '미소냥이', '장미워터', '상추한장']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -151,7 +153,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
       '도박왕', '카지노', '스포츠토토', 'gambling', '커플', '커플헤어져라', '헤어져라',
       '쮸쮸', '빼빼로', '나치', '히틀러', '괴벨스', '시진핑', '이재명', '노무현', '스탈린',
-      '김정은', '령도자', '영도자', '무솔리니', 'ate', '보숭', '보들냥이', '앙앙'];
+      '김정은', '령도자', '영도자', '무솔리니', 'ate', '보숭', '보들냥이', '앙앙', '싫어', '미워해', '못생기다', '추하다'];
     for (const [i, nickname] of moderatedNames.entries()) {
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
