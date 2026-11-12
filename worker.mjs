@@ -30,7 +30,7 @@ const blockedEnglish = /f+u+c+k+|fuk|fvck|fck|phuck|fucken|muthaf|sh+i+t+|shyt|b
 const blockedEnglishWord = /^(?:ass|arse|cock|dick|damn|hell|cunt|fag|sex|sexx|sexy|xxx|cum|cumming|nude|nudes|rape|rapist|wtf|stfu|fml|suck|sucks|crap)$/;
 const leet = { 0: 'o', 1: 'i', 2: 'z', 3: 'e', 4: 'a', 5: 's', 6: 'g', 7: 't', 8: 'b', 9: 'g', '@': 'a', '$': 's', '!': 'i', '+': 't' };
 
-const blockedNegativeKorean = /자살|자해|자해러|죽고싶|죽을래|죽어버|죽어라|살기싫|살고싶지않|사라지고싶|인생나락|나락간|나락행|망한인생|인생망|인생끝|인생포기|인생실패|인간쓰레기|쓰레기인생|인생쓰레기|쓸모없|가치없|태어나지말|태어난게죄|패배자인생|도태인생|무능한나|실업자|무직|백수|실패|(?<!희)망(?:함|했|해|한)|폭망|낙오자|패배자|루저|깔아뭉/;
+const blockedNegativeKorean = /자살|자해|자해러|죽고싶|죽을래|죽어버|죽어라|살기싫|살고싶지않|사라지고싶|인생나락|나락간|나락행|망한인생|인생망|인생끝|인생포기|인생실패|인간쓰레기|쓰레기인생|인생쓰레기|쓸모없|가치없|태어나지말|태어난게죄|패배자인생|도태인생|무능한나|실업자|무직|백수|실패|(?<!희)망(?:함|했|해|한)|폭망|낙오자|패배자|루저|깔아뭉|싫[어다음네]|미워(?!터)|미웠|밉[다네]|못생[기긴겼겨김]|(?<![배고상])추(?:하[다네게고지]|한|해(?!안)|함)/;
 const blockedNegativeEnglish = /suicid|selfharm|killmyself|wanttodie|wannadie|betteroffdead|hatemylife|lifesucks|mylifeisover|worthless|hopeless|bornloser/;
 const blockedNegativeEnglishWord = /^(?:failure|loser|unemployed)$/;
 const blockedSubstancesKorean = /술꾼|술쟁|술마시|술먹|술취|술좋|술사랑|술한잔|술잔|술집|술병|술안주|술파티|술중독|음주|숙취|소주(?!제)|맥주|막걸리|위스키|보드카|데킬라|테킬라|샴페인|고량주|칵테일|담배|흡연|꼴초|니코틴|스누스|마약|약쟁|약빨|약빤|약빠는|약을빨|약을빤|약중독|약에취|약에쩔|약물|뽕빤|뽕맞|뽕에취|대마피|대마폈|뽕쟁|필로폰|히로뽕|코카인|헤로인|펜타닐|엑스터시|대마초|대마흡|케타민|엘에스디|해시시/;
