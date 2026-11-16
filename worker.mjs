@@ -1,7 +1,7 @@
 const ROUND_MS = 120_000;
 const MAX_LIVES = 5;
 const ANSWER_POINTS = 10;
-const RANKING_GENERATION = 2;
+const RANKING_GENERATION = 3;
 const COATS = new Set(['cheese', 'mackerel', 'white', 'gray', 'tuxedo']);
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {
@@ -183,6 +183,10 @@ async function api(request, db, route) {
     return final(row);
   }
   if (route === '/api/finish') return finishGame();
+  // Saved decks point to the question bank used when that round started.
+  if (game.ranking_eligible !== RANKING_GENERATION) {
+    return game.finished ? final(game) : finishGame();
+  }
   const { step, choice } = body;
   if (!Number.isInteger(step) || step < 0 || !Number.isInteger(choice) || choice < 0 || choice > 3) {
     return json({ error: '보기를 골라 주세요.' }, 400);
