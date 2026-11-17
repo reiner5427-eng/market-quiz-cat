@@ -1,7 +1,7 @@
 const ROUND_MS = 120_000;
 const MAX_LIVES = 5;
 const ANSWER_POINTS = 10;
-const RANKING_GENERATION = 3;
+const RANKING_GENERATION = 5;
 const COATS = new Set(['cheese', 'mackerel', 'white', 'gray', 'tuxedo']);
 const shuffle = items => {
   for (let i = items.length - 1; i > 0; i--) {

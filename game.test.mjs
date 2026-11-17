@@ -31,7 +31,7 @@ test('grades once, expires, and shares the top 200 across database connections',
     db.exec(readFileSync('drizzle/0002_ranking_coat.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0003_expand_cat_coats.sql', 'utf8'));
     db.exec(readFileSync('drizzle/0004_score_penalty.sql', 'utf8'));
-    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 2)')
+    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 3)')
       .run('previous', '이전시즌', '[]', 1, 200);
     const oldRound = 'a0000000-0000-0000-0000-000000000000';
     db.prepare('INSERT INTO games (id, nickname, deck, started, step, score, mistakes, ranking_eligible) VALUES (?, ?, ?, ?, 1, 10, 0, 2)')
@@ -155,7 +155,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       { finished: true, score: 10, weight: '3.25', lives: 0, correctCount: 6 });
     assert.ok((await data('/api/ranking')).some(row => row.nickname === '하트점검' && row.score === 10));
     const insert = db.prepare(
-      'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 3)'
+      'INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 1, 5)'
     );
     const moderatedNames = ['인생 나락간', '니얼굴', '느금마', '술꾼', '담배', '자살', '마약', 'lifesucks', '뿌지직', '똥고양이', '응가대장', '남자친구', '여친',
       '실업자', '실패한고양이', '인생망함', '깔아뭉갬', '약빤고양이', '약을하다', '약물냥이',
@@ -168,7 +168,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       insert.run('blocked' + i, nickname, '[]', i, 500);
       insert.run('blockedRetry' + i, nickname, '[]', i + 20, 400);
     }
-    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 0, 3)')
+    db.prepare('INSERT INTO games (id, nickname, deck, started, score, finished, ranking_eligible) VALUES (?, ?, ?, ?, ?, 0, 5)')
       .run('active', '인생 나락간', '[]', 1, 10);
     assert.ok(!(await data('/api/ranking')).some(row => moderatedNames.includes(row.nickname)));
     assert.equal(db.prepare("SELECT COUNT(*) AS count FROM games WHERE id LIKE 'blocked%'").get().count, 0);
