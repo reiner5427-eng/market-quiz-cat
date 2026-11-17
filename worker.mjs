@@ -58,6 +58,11 @@ const blockedPoliticalKorean = /히틀러|히틀라|괴벨스|고벨스|괴벨�
 const blockedPoliticalKoreanWord = /^(?:나[치찌]|[령영]도자)(?:[0-9]*)$/;
 const blockedPoliticalEnglish = /nazi|hitt?ler|goebbels|gobbels|xijinping|leejaem(?:yung|yeong)|rohm(?:oo|u)hyun|stalin|(?:kimjong|gimjeong)(?:un|eun)|mussolini/;
 
+function hasReservedNickname(name) {
+  const compact = name.normalize('NFKC').toLowerCase().replace(/[\s\p{Cf}\p{M}_-]/gu, '').normalize('NFKC');
+  return /세무냥이|리트냥이|편입냥이|충주냥이|7급냥이|한전냥이|작수냥이|엠딧냥이|관세냥이|감평냥이/u.test(compact);
+}
+
 function nicknameWarning(nickname) {
   const normalized = nickname.normalize('NFKC').toLowerCase().replace(/[\p{M}\p{Cf}]/gu, '');
   const korean = normalized.replace(/[^가-힣\u1100-\u11ff]/g, '').normalize('NFKC');
@@ -146,7 +151,7 @@ async function api(request, db, route) {
   }
   if (route === '/api/start') {
     const entered = typeof body.nickname === 'string' ? body.nickname : '';
-    const warning = nicknameWarning(entered);
+    const warning = hasReservedNickname(entered) ? '사용할 수 없는 닉네임입니다.' : nicknameWarning(entered);
     if (warning) return json({ error: warning }, 400);
     const nickname = entered.normalize('NFKC').trim();
     if (hasMultiplePersonalNames(nickname)) {
