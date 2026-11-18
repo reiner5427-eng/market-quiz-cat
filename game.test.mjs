@@ -86,12 +86,15 @@ test('grades once, expires, and shares the top 200 across database connections',
     assert.equal((await client('/api/start', { nickname: '장애인친구' })).status, 400);
     assert.equal((await client('/api/start', { nickname: '단호박죽' })).status, 400);
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM games').get().count, 0);
-    for (const nickname of ['푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
+    for (const nickname of ['돼나요', '당 뇨', '역_류', '반딧불이', '주 먹', '스 마 트', '안_경', '도 둑', '빡냥이']) {
+      assert.equal((await client('/api/start', { nickname })).status, 400, nickname);
+    }
+    for (const nickname of ['되나요', '푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
       '약속친구', '대마법사', '대마왕', '눈물의승리', '절망을이겨낸', 'AmethystCat', 'SeaweedCat',
       'TweedCat', 'PotatoCat', 'Cracker', '소주제달인', '우리친구', '친절냥이', '변신고양이', '대변인',
       '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
       '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이', '문채은', '김준', '치즈 고양이', '강아지 고양이',
-      '하늘 구름', '김밥 이불', '김밥 먹는냥이', '유자차 이불', '피보나치', '지나치게귀여운', '부산영도', '영도자전거',
+      '하늘 구름', '김밥 친구', '김밥 먹는냥이', '유자차 친구', '피보나치', '지나치게귀여운', '부산영도', '영도자전거',
       '고령도자기', '정은고양이', 'Chocolate', 'PirateCat', '실타래', '미소냥이', '장미워터', '상추한장']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);

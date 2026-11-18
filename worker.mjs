@@ -1,6 +1,10 @@
 const ROUND_MS = 120_000;
 const MAX_LIVES = 5;
 const ANSWER_POINTS = 10;
+const RECORD_REMOVAL_TERMS = ["돼","당뇨","역류","불","주먹","스마트","안경","도둑","빡"];
+// Stored nicknames are NFKC-normalized and may include ASCII spaces and underscores.
+const compactStoredNickname = "replace(replace(nickname, ' ', ''), '_', '')";
+const removedNicknamePredicate = RECORD_REMOVAL_TERMS.map(() => `instr(${compactStoredNickname}, ?) > 0`).join(' OR ');
 const RANKING_GENERATION = 5;
 const COATS = new Set(['cheese', 'mackerel', 'white', 'gray', 'tuxedo']);
 const shuffle = items => {
@@ -60,7 +64,7 @@ const blockedPoliticalEnglish = /nazi|hitt?ler|goebbels|gobbels|xijinping|leejae
 
 function hasReservedNickname(name) {
   const compact = name.normalize('NFKC').toLowerCase().replace(/[\s\p{Cf}\p{M}_-]/gu, '').normalize('NFKC');
-  return /세무냥이|리트냥이|편입냥이|충주냥이|7급냥이|한전냥이|작수냥이|엠딧냥이|관세냥이|감평냥이|노안|예일리언|에일리언|야르|왜|잼민|응우엔|응우옌|응우|장애|게이|사랑해|죽|니거|니그로|돼지|섹시|울트라|씹|몸무게/u.test(compact);
+  return /세무냥이|리트냥이|편입냥이|충주냥이|7급냥이|한전냥이|작수냥이|엠딧냥이|관세냥이|감평냥이|노안|예일리언|에일리언|야르|왜|잼민|응우엔|응우옌|응우|장애|게이|사랑해|죽|니거|니그로|돼지|섹시|울트라|씹|몸무게|돼|당뇨|역류|불|주먹|스마트|안경|도둑|빡/u.test(compact);
 }
 
 function nicknameWarning(nickname) {
@@ -129,12 +133,12 @@ async function api(request, db, route) {
         SELECT nickname, score, COALESCE(cat_coat, coat) AS coat, started, id,
           ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
         FROM games
-        WHERE ranking_eligible = ? AND finished = 1 AND score > 0
+        WHERE ranking_eligible = ? AND finished = 1 AND score > 0 AND NOT (${removedNicknamePredicate})
       )
       SELECT nickname, score, coat FROM best
       WHERE attempt = 1
       ORDER BY score DESC, started, id LIMIT 200`
-    ).bind(RANKING_GENERATION).all();
+    ).bind(RANKING_GENERATION, ...RECORD_REMOVAL_TERMS).all();
     return json(results.map((row, i) => ({ ...row, weight: weight(row.score), rank: i + 1 })));
   }
   if (request.method !== 'POST') return json({ error: '지원하지 않는 요청이에요.' }, 405);
