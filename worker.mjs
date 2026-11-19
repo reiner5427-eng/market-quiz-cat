@@ -62,6 +62,10 @@ const blockedPoliticalKorean = /히틀러|히틀라|괴벨스|고벨스|괴벨�
 const blockedPoliticalKoreanWord = /^(?:나[치찌]|[령영]도자)(?:[0-9]*)$/;
 const blockedPoliticalEnglish = /nazi|hitt?ler|goebbels|gobbels|xijinping|leejaem(?:yung|yeong)|rohm(?:oo|u)hyun|stalin|(?:kimjong|gimjeong)(?:un|eun)|mussolini/;
 
+function containsLatinNickname(value) {
+  return typeof value === 'string' && /\p{Script=Latin}/u.test(value.normalize('NFKC'));
+}
+
 function hasReservedNickname(name) {
   const compact = name.normalize('NFKC').toLowerCase().replace(/[\s\p{Cf}\p{M}_-]/gu, '').normalize('NFKC');
   return /세무냥이|리트냥이|편입냥이|충주냥이|7급냥이|한전냥이|작수냥이|엠딧냥이|관세냥이|감평냥이|노안|예일리언|에일리언|야르|왜|잼민|응우엔|응우옌|응우|장애|게이|사랑해|죽|니거|니그로|돼지|섹시|울트라|씹|몸무게|돼|당뇨|역류|불|주먹|스마트|안경|도둑|빡/u.test(compact);
@@ -133,7 +137,7 @@ async function api(request, db, route) {
         SELECT nickname, score, COALESCE(cat_coat, coat) AS coat, started, id,
           ROW_NUMBER() OVER (PARTITION BY nickname COLLATE NOCASE ORDER BY score DESC, started, id) AS attempt
         FROM games
-        WHERE ranking_eligible = ? AND finished = 1 AND score > 0 AND NOT (${removedNicknamePredicate})
+        WHERE ranking_eligible = ? AND finished = 1 AND score > 0 AND nickname NOT GLOB '*[A-Za-z]*' AND NOT (${removedNicknamePredicate})
       )
       SELECT nickname, score, coat FROM best
       WHERE attempt = 1
@@ -155,6 +159,7 @@ async function api(request, db, route) {
   }
   if (route === '/api/start') {
     const entered = typeof body.nickname === 'string' ? body.nickname : '';
+    if (containsLatinNickname(entered)) return json({ error: '영문자는 닉네임에 사용할 수 없습니다.' }, 400);
     const warning = nicknameWarning(entered) || (hasReservedNickname(entered) ? '사용할 수 없는 닉네임입니다.' : '');
     if (warning) return json({ error: warning }, 400);
     const nickname = entered.normalize('NFKC').trim();
@@ -162,7 +167,7 @@ async function api(request, db, route) {
       return json({ error: '이름은 한 개만 입력해 주세요.' }, 400);
     }
     if (!/^[가-힣A-Za-z0-9_ ]{2,12}$/.test(nickname) || !/[가-힣A-Za-z]/.test(nickname) || /\d{5,}/.test(nickname)) {
-      return json({ error: '한글 또는 영문이 포함된 2~12자 별명을 입력해 주세요.' }, 400);
+      return json({ error: '한글이 포함된 2~12자 별명을 입력해 주세요.' }, 400);
     }
     const coat = body.coat ?? null;
     if (coat !== null && !COATS.has(coat)) {

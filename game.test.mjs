@@ -50,7 +50,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       '니애미', '니1애미', '느그엄마', '니면상']) {
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
-      assert.deepEqual(await rejected.json(), { error: '비속어는 사용할 수 없습니다.' });
+      assert.deepEqual(await rejected.json(), { error: /\p{Script=Latin}/u.test(nickname.normalize('NFKC')) ? '영문자는 닉네임에 사용할 수 없습니다.' : '비속어는 사용할 수 없습니다.' });
     }
     for (const nickname of ['인생 나락간', '인생_나락간', '인1생나락간', '망한인생', '자살', '자1살', '자_해',
       '죽고싶다', '살기싫어', '쓸모없는나', 'SU1CIDE', 'self_harm', 'lifesucks', '소주한잔', '소 주', '술꾼',
@@ -75,7 +75,7 @@ test('grades once, expires, and shares the top 200 across database connections',
       const rejected = await client('/api/start', { nickname });
       assert.equal(rejected.status, 400, nickname);
       assert.deepEqual(await rejected.json(),
-        { error: '사용할 수 없는 표현이 포함되어 있습니다.' }, nickname);
+        { error: /\p{Script=Latin}/u.test(nickname.normalize('NFKC')) ? '영문자는 닉네임에 사용할 수 없습니다.' : '사용할 수 없는 표현이 포함되어 있습니다.' }, nickname);
     }
     for (const nickname of ['문채은 양신우', '문채은_양신우', '문채은,양신우', '문채은/양신우',
       '문채은·양신우', '문채은&양신우', '홍길동 김철수', '남궁민 독고영재', '김준 이솔', '김1민수 이2서연']) {
@@ -89,13 +89,18 @@ test('grades once, expires, and shares the top 200 across database connections',
     for (const nickname of ['돼나요', '당 뇨', '역_류', '반딧불이', '주 먹', '스 마 트', '안_경', '도 둑', '빡냥이']) {
       assert.equal((await client('/api/start', { nickname })).status, 400, nickname);
     }
-    for (const nickname of ['되나요', '푸른달7', 'CloudCat', 'classmate', 'Biscuit', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
-      '약속친구', '대마법사', '대마왕', '눈물의승리', '절망을이겨낸', 'AmethystCat', 'SeaweedCat',
-      'TweedCat', 'PotatoCat', 'Cracker', '소주제달인', '우리친구', '친절냥이', '변신고양이', '대변인',
+    for (const nickname of ['CloudCat', 'a고양이', '고양이Z', 'ＡＢＣ', 'é고양이']) {
+      const rejected = await client('/api/start', { nickname });
+      assert.equal(rejected.status, 400, nickname);
+      assert.equal((await rejected.json()).error, '영문자는 닉네임에 사용할 수 없습니다.');
+    }
+    for (const nickname of ['되나요', '푸른달7', '순한고양이1', '순한고양이2', '순한고양이3', '겨울 판다', '별_친구', '희망고양이', '마술사', '기술자', '예술가', '미술왕', '절약왕',
+      '약속친구', '대마법사', '대마왕', '눈물의승리', '절망을이겨낸', '순한고양이4', '순한고양이5',
+      '순한고양이6', '순한고양이7', '순한고양이8', '소주제달인', '우리친구', '친절냥이', '변신고양이', '대변인',
       '방구석고양이', '별빛가루', '절약을하는냥이', '계약을하는친구', '도약하는고양이', '나약하지않아',
-      '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', 'Alphabet', 'BetterCat', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이', '문채은', '김준', '치즈 고양이', '강아지 고양이',
+      '새내기냥이', '토토로', '대박고양이', '트로피냥이', '포커스냥이', '순한고양이9', '순한고양이10', '헤어디자이너', '희망해', '솔로고양이', '헤어나온냥이', '문채은', '김준', '치즈 고양이', '강아지 고양이',
       '하늘 구름', '김밥 친구', '김밥 먹는냥이', '유자차 친구', '피보나치', '지나치게귀여운', '부산영도', '영도자전거',
-      '고령도자기', '정은고양이', 'Chocolate', 'PirateCat', '실타래', '미소냥이', '장미워터', '상추한장']) {
+      '고령도자기', '정은고양이', '순한고양이11', '순한고양이12', '실타래', '미소냥이', '장미워터', '상추한장']) {
       const allowed = await client('/api/start', { nickname });
       assert.equal(allowed.status, 200, nickname);
     }
@@ -181,8 +186,8 @@ test('grades once, expires, and shares the top 200 across database connections',
     insert.run('lower', '고양이3', '[]', 41, 10);
     insert.run('tie', '고양이3', '[]', 42, 30);
     insert.run('tieOther', '고양이5', '[]', 41, 30);
-    insert.run('caseBest', 'CloudCat', '[]', 43, 40);
-    insert.run('caseLower', 'cloudcat', '[]', 44, 30);
+    insert.run('caseBest', '구름고양이', '[]', 43, 40);
+    insert.run('caseLower', '구름고양이', '[]', 44, 30);
     const setCoat = db.prepare('UPDATE games SET coat = ? WHERE id = ?');
     setCoat.run('white', 'best');
     setCoat.run('gray', 'lower');
@@ -194,9 +199,9 @@ test('grades once, expires, and shares the top 200 across database connections',
     const board = await data('/api/ranking');
     assert.equal(board.length, 200);
     assert.deepEqual(board.slice(0, 4).map(row => [row.nickname, row.score]), [
-      ['CloudCat', 40], ['고양이3', 30], ['고양이5', 30], ['고양이1', 20]
+      ['구름고양이', 40], ['고양이3', 30], ['고양이5', 30], ['고양이1', 20]
     ]);
-    assert.equal(board.filter(row => row.nickname.toLowerCase() === 'cloudcat').length, 1);
+    assert.equal(board.filter(row => row.nickname.toLowerCase() === '구름고양이').length, 1);
     assert.equal(board.filter(row => row.nickname === '고양이3').length, 1);
     assert.equal(board[0].coat, 'cheese');
     assert.equal(board[1].coat, 'white');
